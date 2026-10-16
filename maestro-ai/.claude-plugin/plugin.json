@@ -1,6 +1,6 @@
 {
   "name": "maestro-ai",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A team of subagents for software development: research, implementation, testing, review and model escalation by complexity.",
   "author": {
     "name": "Felipe Faria da Costa",

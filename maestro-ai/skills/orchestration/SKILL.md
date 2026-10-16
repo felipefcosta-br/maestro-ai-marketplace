@@ -7,6 +7,8 @@ description: Subagent orchestration rules (maestro-ai). Use when planning any de
 
 The main session is the orchestrator: it understands the task, splits it into steps, writes each agent's briefing and integrates the results. Every agent starts with no context, so the quality of the briefing decides the quality of the result.
 
+> Subagents and hooks exist only in Claude Code and Cowork. In chat, do the same steps yourself: keep the briefing discipline (goal, minimal context, definition of done), ask before big decisions and review your own result before delivering.
+
 ## 0. Language
 
 Decide the working language before anything else:

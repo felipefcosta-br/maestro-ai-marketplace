@@ -8,9 +8,19 @@ A team of subagents for software development. The main session orchestrates; age
 
 - **agents/**: seven subagents (table below)
 - **skills/orchestration/**: rules for when to delegate, briefing, escalation, review (loaded on demand)
-- **commands/**: `/maestro-ai:implement-test-review`, `/maestro-ai:pre-commit-review`, `/maestro-ai:save-context`, `/maestro-ai:resume`
+- **commands/**: `/maestro-ai:research`, `/maestro-ai:plan`, `/maestro-ai:save-context`, `/maestro-ai:resume` (everywhere); `/maestro-ai:implement-test-review`, `/maestro-ai:pre-commit-review` (code)
 - **hooks/**: secrets and destructive-command protection, Fable confirmation, long-conversation warning
 - **templates/**: `AGENTS.md`, `settings.json`, briefing and output formats
+
+## Where it works
+
+| Part | Claude Code | Cowork | Chat (Desktop / claude.ai) |
+|---|---|---|---|
+| Skills and commands | yes | yes | yes |
+| Subagents | yes | yes | no |
+| Hooks | yes | yes | no |
+
+In chat, the skill's rules still guide the conversation (briefing, asking before big decisions, self-review), but nothing switches models or blocks commands. Plugins need a paid plan.
 
 ## Agents
 

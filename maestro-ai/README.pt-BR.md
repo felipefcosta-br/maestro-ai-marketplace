@@ -8,9 +8,19 @@ Um time de subagentes para desenvolvimento de software. A sessão principal orqu
 
 - **agents/**: sete subagentes (tabela abaixo)
 - **skills/orchestration/**: regras de quando delegar, briefing, escalonamento e revisão (carregada sob demanda)
-- **commands/**: `/maestro-ai:implement-test-review`, `/maestro-ai:pre-commit-review`, `/maestro-ai:save-context`, `/maestro-ai:resume`
+- **commands/**: `/maestro-ai:research`, `/maestro-ai:plan`, `/maestro-ai:save-context`, `/maestro-ai:resume` (em todo lugar); `/maestro-ai:implement-test-review`, `/maestro-ai:pre-commit-review` (código)
 - **hooks/**: proteção contra segredos e comandos destrutivos, confirmação do Fable, aviso de conversa longa
 - **templates/**: `AGENTS.md`, `settings.json`, formatos de briefing e saída
+
+## Onde funciona
+
+| Parte | Claude Code | Cowork | Chat (Desktop / claude.ai) |
+|---|---|---|---|
+| Skills e comandos | sim | sim | sim |
+| Subagentes | sim | sim | não |
+| Hooks | sim | sim | não |
+
+No chat, as regras da skill ainda orientam a conversa (briefing, perguntar antes de decisões grandes, autorrevisão), mas nada troca de modelo nem bloqueia comandos. Plugins exigem plano pago.
 
 ## Agentes
 

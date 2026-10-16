@@ -90,7 +90,7 @@ class TestSkillCommandsHooks(unittest.TestCase):
 
     def test_commands_have_description(self):
         commands = glob.glob(os.path.join(PLUGIN, "commands", "*.md"))
-        self.assertEqual(len(commands), 4)
+        self.assertEqual(len(commands), 6)
         for c in commands:
             self.assertTrue(frontmatter(c).get("description"), c)
 

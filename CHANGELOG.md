@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0] - 2026-10-16
+### Added
+- Works beyond Claude Code: skills and commands run in Claude Desktop chat, claude.ai and Cowork; subagents and hooks stay Claude Code/Cowork only.
+- `/maestro-ai:research` (current sources, checkable answer) and `/maestro-ai:plan` (steps, risks, open questions, no execution).
+### Changed
+- `/maestro-ai:save-context` and `/maestro-ai:resume` work without a shell or Git (chat): the file is created for download or attached/pasted back; the format covers non-code work too.
+
 ## [0.2.1] - 2026-10-16
 ### Added
 - Language rule in the `orchestration` skill: use the recorded language; if the user writes in English, use English; otherwise ask once which language to use. `Language:` line in the `AGENTS.md` template and in `.maestro-ai/context.md`.
