@@ -1,0 +1,15 @@
+{
+  "name": "maestro-ai-marketplace",
+  "owner": {
+    "name": "maestro-ai"
+  },
+  "description": "Marketplace local do plugin maestro-ai: time de subagentes para desenvolvimento.",
+  "plugins": [
+    {
+      "name": "maestro-ai",
+      "source": "./maestro-ai",
+      "description": "Time de subagentes para desenvolvimento: pesquisa, implementação, testes, revisão e escalonamento por complexidade.",
+      "version": "0.1.1"
+    }
+  ]
+}

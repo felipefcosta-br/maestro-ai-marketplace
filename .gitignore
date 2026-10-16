@@ -1,0 +1,22 @@
+# Contexto de trabalho do maestro-ai (pode conter detalhes de projetos; nunca versionar)
+.maestro-ai/
+
+# Segredos
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# Configuração local do Claude Code
+.claude/settings.local.json
+
+# Python e sistema
+__pycache__/
+*.pyc
+.DS_Store
+
+# Pacotes gerados
+*.zip
