@@ -1,5 +1,9 @@
 {
   "name": "maestro-ai",
-  "version": "0.1.1",
-  "description": "Time de subagentes para desenvolvimento: pesquisa, implementação, testes, revisão e escalonamento por complexidade."
+  "version": "0.2.1",
+  "description": "A team of subagents for software development: research, implementation, testing, review and model escalation by complexity.",
+  "author": {
+    "name": "Felipe Faria da Costa",
+    "url": "https://github.com/felipefcosta-br"
+  }
 }

@@ -1,39 +1,40 @@
 # AGENTS.md
 
-> Modelo curto. Preencha a seção "Projeto" em cada repositório e apague o que não se aplicar.
-> Mantenha este arquivo enxuto: detalhes longos vão em `docs/` e as regras de orquestração ficam na skill `orquestracao` do plugin maestro-ai.
+> Short template. Fill in the "Project" section in each repository and delete what does not apply.
+> Keep this file lean: long details go in `docs/`, and the orchestration rules live in the `orchestration` skill of the maestro-ai plugin.
 
-## Projeto
-- **Linguagem/stack:** Kotlin (ajuste por projeto)
-- **Build/gerenciador:** Gradle (`./gradlew`)
-- **Hospedagem/CI:** GitHub (Actions)
-- **Comando de teste (suíte completa):** `./gradlew test`
-- **Teste de uma classe/método:** `./gradlew test --tests "pacote.NomeDaClasse"`
-- **Lint/formatação:** `./gradlew ktlintCheck` (ou `detekt`; ajuste ao projeto)
+## Project
+- **Language:** English (language for replies, briefings and saved context; change to e.g. Portuguese if preferred)
+- **Language/stack:** Kotlin (adjust per project)
+- **Build tool:** Gradle (`./gradlew`)
+- **Hosting/CI:** GitHub (Actions)
+- **Test command (full suite):** `./gradlew test`
+- **Test a single class/method:** `./gradlew test --tests "package.ClassName"`
+- **Lint/format:** `./gradlew ktlintCheck` (or `detekt`; adjust to the project)
 - **Build:** `./gradlew build`
 
-> Outras linguagens: troque os comandos acima (ex.: `npm test`, `pytest`, `mvn test`, `cargo test`).
+> Other languages: replace the commands above (e.g. `npm test`, `pytest`, `mvn test`, `cargo test`).
 
-## Convenções
-- (Preencher: padrão de nomes, estrutura de pastas, estilo de commits, regras de PR)
+## Conventions
+- (Fill in: naming, folder structure, commit style, PR rules)
 
-## Armadilhas conhecidas
-- (Preencher: módulos gerados que não se editam, flags obrigatórias, testes lentos, etc.)
+## Known pitfalls
+- (Fill in: generated modules that must not be edited, required flags, slow tests, etc.)
 
-## Documentação sob demanda
-- Arquitetura: `docs/architecture.md` (ler ao mexer em módulos centrais)
-- Decisões: `docs/decisions/` (ler antes de propor mudanças de desenho)
+## On-demand documentation
+- Architecture: `docs/architecture.md` (read when touching core modules)
+- Decisions: `docs/decisions/` (read before proposing design changes)
 
-## Orquestração (resumo)
-- Perguntas simples e tarefas pequenas (1-2 arquivos): resolver direto, sem delegar.
-- Tarefas amplas, com mais de 3 arquivos ou muito ruído: delegar aos agentes do maestro-ai, seguindo a skill `orquestracao` (quem faz o quê, briefing, escalonamento, revisão).
-- **Arquiteto:** antes de acioná-lo, perguntar ao usuário se quer Fable ou Opus, sempre incluindo a recomendação.
-- Fluxos fixos: `/maestro-ai:implementar-testar-revisar` e `/maestro-ai:revisao-pre-commit`.
-- Conversa longa: `/maestro-ai:salvar-contexto` grava `.maestro-ai/contexto.md` e `/maestro-ai:retomar` continua numa sessão limpa. Manter `.maestro-ai/` fora do Git.
+## Orchestration (summary)
+- Simple questions and small tasks (1-2 files): handle directly, without delegating.
+- Broad tasks, more than 3 files or a lot of noise: delegate to the maestro-ai agents, following the `orchestration` skill (who does what, briefing, escalation, review).
+- **Architect:** before calling it, ask the user whether they want Fable or Opus, always including your recommendation.
+- Fixed workflows: `/maestro-ai:implement-test-review` and `/maestro-ai:pre-commit-review`.
+- Long conversation: `/maestro-ai:save-context` writes `.maestro-ai/context.md` and `/maestro-ai:resume` continues in a clean session. Keep `.maestro-ai/` out of Git.
 
-## Segurança
-- Nunca colocar neste arquivo, em briefings ou em logs: credenciais, tokens, chaves, dados de clientes ou informação confidencial.
-- Não ler `.env`, arquivos de chaves ou segredos (o plugin também bloqueia por hook).
-- Somente o `pesquisador` acessa a web. Agentes que escrevem não usam rede nem instalam pacotes.
-- Pedir confirmação antes de: instalar pacotes, comandos com rede, `git commit` e `git push`.
-- Proibido: `rm -rf` e comandos destrutivos sem pedido explícito.
+## Security
+- Never put credentials, tokens, keys, customer data or confidential information in this file, in briefings or in logs.
+- Do not read `.env`, key files or secrets (the plugin also blocks this with a hook).
+- Only the `researcher` uses the web. Agents that write files do not use the network or install packages.
+- Ask for confirmation before: installing packages, commands that use the network, `git commit` and `git push`.
+- Forbidden: `rm -rf` and destructive commands without an explicit request.

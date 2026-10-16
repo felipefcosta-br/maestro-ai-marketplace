@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/confirmar-fable.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/confirm-fable.py\""
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/protecao.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/protection.py\""
           }
         ]
       }
@@ -25,7 +25,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/aviso-contexto.py\""
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/context-warning.py\""
           }
         ]
       }

@@ -1,60 +1,61 @@
 # maestro-ai
 
-Time de subagentes para desenvolvimento no Claude Code. A sessão principal orquestra: delega pesquisa, implementação, testes e revisão a agentes com modelo e ferramentas adequados a cada papel, e escala para modelos mais fortes quando necessário.
+[Português](README.pt-BR.md)
 
-## Conteúdo
+A team of subagents for software development. The main session orchestrates; agents do the work with fixed models and tools.
 
-| Pasta | O que tem |
-|---|---|
-| `agents/` | pesquisador (haiku), analista, implementador, testador, revisor (sonnet), especialista, arquiteto (opus; fable sob aprovação) |
-| `skills/orquestracao/` | Regras de delegação, escalonamento, pergunta do arquiteto, revisão; templates de briefing e de saída |
-| `commands/` | `/maestro-ai:implementar-testar-revisar`, `/maestro-ai:revisao-pre-commit`, `/maestro-ai:salvar-contexto` e `/maestro-ai:retomar` |
-| `hooks/` | `protecao.py` (bloqueia segredos e comandos destrutivos), `confirmar-fable.py` (confirmação ao usar Fable) e `aviso-contexto.py` (avisa quando a conversa ficou longa) |
-| `templates/` | `AGENTS.md` modelo e `settings.json` com permissões allow/ask/deny |
+## Contents
 
-## Instalação (uso pessoal)
+- **agents/**: seven subagents (table below)
+- **skills/orchestration/**: rules for when to delegate, briefing, escalation, review (loaded on demand)
+- **commands/**: `/maestro-ai:implement-test-review`, `/maestro-ai:pre-commit-review`, `/maestro-ai:save-context`, `/maestro-ai:resume`
+- **hooks/**: secrets and destructive-command protection, Fable confirmation, long-conversation warning
+- **templates/**: `AGENTS.md`, `settings.json`, briefing and output formats
 
-Opção A (recomendada): instalar pelo marketplace local. Extraia o zip numa pasta fixa e, no Claude Code:
+## Agents
+
+| Agent | Model | Tools | Role |
+|---|---|---|---|
+| researcher | haiku | read, web | Find information, read docs |
+| analyst | sonnet | read, bash | Investigate code and logs (read-only) |
+| implementer | sonnet | read, edit, bash | Implement well-defined changes |
+| tester | sonnet | read, edit, bash | Write and run tests |
+| specialist | opus | read, edit, bash | Complex or delicate tasks |
+| architect | opus (fable on request) | read, bash | Design and trade-offs; the user is always asked Fable vs Opus, with a recommendation |
+| reviewer | sonnet | read, bash | Review complex or implemented code (read-only) |
+
+Agents write reports in the language of the briefing, in `summary` or `didactic` mode.
+
+## Install
+
 ```
-/plugin marketplace add /caminho/para/maestro-ai-marketplace
-/plugin install maestro-ai@maestro-ai-marketplace
-```
-O `marketplace.json` passou em `claude plugin validate` e a instalação por esse caminho funcionou numa configuração isolada de teste (v0.1.1). Ainda não foi exercitado de ponta a ponta com um modelo; se o Claude Code da sua versão recusar, use a Opção B.
-
-Opção B: testar o plugin direto da pasta:
-```
-claude --plugin-dir /caminho/para/maestro-ai
+claude plugin marketplace add felipefcosta-br/maestro-ai-marketplace
+claude plugin install maestro-ai@maestro-ai-marketplace
 ```
 
-Opção C: prototipar sem plugin, copiando os arquivos para `~/.claude/`:
+From the marketplace (see the root README), or per project by copying `agents/`, `skills/` and `commands/` into `.claude/`.
+
+## Permissions
+
+`templates/settings.json` is a strict starting point (allow read-only commands, ask for edits, commits, network, deny secrets and destructive commands). For corporate use, put it in the repository's `.claude/settings.json`.
+
+## Per-project AGENTS.md
+
+Copy `templates/AGENTS.md` into each repository and fill in the "Project" section (test command, conventions, pitfalls).
+
+## Language
+
+If the user writes in English, everything is in English. If they write in another language and none is recorded, the main session asks once which language to use, then records it (`Language:` in `AGENTS.md` / `.maestro-ai/context.md`).
+
+## Long conversations
+
+- `/maestro-ai:save-context` writes a summary to `.maestro-ai/context.md` (keep it out of Git).
+- `/maestro-ai:resume` continues from it in a clean session.
+- A hook warns when the conversation gets long: by transcript size if available (`MAESTRO_AI_LIMIT_KB`, default 600), otherwise every N messages (`MAESTRO_AI_LIMIT_MSGS`, default 30).
+
+## Validate
+
 ```
-cp agents/*.md ~/.claude/agents/
-cp -r skills/orquestracao ~/.claude/skills/
+claude plugin validate .
+python3 -m unittest discover -s tests -v
 ```
-Nesse caso os comandos e hooks precisam ser copiados/registrados à parte.
-
-Confirme na documentação da sua versão do Claude Code os detalhes de instalação de plugins e o formato do `hooks.json`.
-
-## Permissões
-
-Plugins normalmente não definem permissões. Copie o conteúdo de `templates/settings.json` para o `settings.json` do usuário (`~/.claude/settings.json`) ou do projeto (`.claude/settings.json`) e ajuste. Comece conservador e afrouxe com o uso. Na conta do trabalho, use a lista de bloqueios mais rígida.
-
-## Por projeto
-
-Copie `templates/AGENTS.md` para a raiz do repositório e preencha a seção "Projeto" (stack, comando de teste, convenções). Se a ferramenta lê `CLAUDE.md`, referencie o AGENTS.md de dentro dele.
-
-## Contexto para conversas longas
-
-1. O hook `aviso-contexto.py` avisa quando a conversa fica longa:
-   - **Plano A:** se recebe `transcript_path`, avisa uma vez por sessão quando a transcrição passa de 600 KB (variável `MAESTRO_AI_LIMITE_KB`).
-   - **Plano B:** se não houver transcrição legível, conta as mensagens e avisa a cada 30 (variável `MAESTRO_AI_LIMITE_MSGS`). É menos preciso: sem `session_id`, o contador é compartilhado entre as sessões do mesmo diretório.
-2. `/maestro-ai:salvar-contexto` grava o estado em `.maestro-ai/contexto.md`.
-3. Numa sessão nova (`/clear` ou outra janela), `/maestro-ai:retomar` lê só esse arquivo, confere o repositório e continua do próximo passo.
-
-Coloque `.maestro-ai/` no `.gitignore` do projeto e nunca registre segredos no contexto.
-
-## Pontos a validar na sua versão
-- O hook `UserPromptSubmit` recebe `transcript_path` e `session_id`? Sem `transcript_path`, o aviso cai no plano B (contador de mensagens). Se o hook nem rodar, o aviso não dispara, mas os comandos funcionam do mesmo jeito.
-- Nome do matcher de subagentes nos hooks (`Agent` ou `Task`; ambos estão configurados) e se o hook recebe o campo `model`.
-- Se o alias `fable` funciona no frontmatter ou na chamada; se não, use o ID completo do modelo.
-- Antes de usar no código da empresa: checar com TI/segurança modelos permitidos, uso de web e shell, e retenção de dados.

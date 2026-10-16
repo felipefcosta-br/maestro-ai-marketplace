@@ -1,71 +1,49 @@
-# maestro-ai
+# maestro-ai marketplace
 
-Time de subagentes para desenvolvimento no Claude Code. A sessão principal orquestra: delega pesquisa, implementação, testes e revisão a agentes com modelo e ferramentas adequados a cada papel, e escala para modelos mais fortes só quando necessário (o modelo mais caro sempre com aprovação do usuário).
+[Português](README.pt-BR.md)
 
-Este repositório é um **marketplace** do Claude Code que contém o plugin `maestro-ai`. Documentação do plugin: [`maestro-ai/README.md`](maestro-ai/README.md).
+A Claude Code marketplace that distributes **maestro-ai**: a team of specialized subagents for software development. The main session orchestrates and delegates to agents with fixed models and tools, to reduce cost and increase quality.
 
-## Instalar
-
-Substitua `DONO` pelo usuário ou organização dona do repositório.
+## Install
 
 ```
-claude plugin marketplace add DONO/maestro-ai-marketplace
+claude plugin marketplace add felipefcosta-br/maestro-ai-marketplace
 claude plugin install maestro-ai@maestro-ai-marketplace
 ```
 
-Para repositório privado, a máquina precisa de acesso Git ao repositório (por exemplo, `gh auth login` ou chave SSH). A partir de uma cópia local, use o caminho da pasta no lugar de `DONO/...`.
+The repository is private: Git must be authenticated with an account that can read it (with the GitHub CLI: `gh auth switch -u felipefcosta-br`). The plugin is installed per OS user (`~/.claude`), so one install serves every Claude account on the machine.
 
-Depois de instalar:
-1. Copie `maestro-ai/templates/settings.json` para as suas permissões (o plugin não as define).
-2. Use `maestro-ai/templates/AGENTS.md` como modelo em cada projeto.
-
-> **Segurança:** o plugin inclui hooks, que são scripts executados na sua máquina. Leia `maestro-ai/hooks/*.py` antes de instalar, principalmente em máquina de trabalho, e confirme com TI/segurança quando houver política.
-
-## Atualizar
-
-Em cada máquina ou usuário onde estiver instalado:
+## Update
 
 ```
 claude plugin marketplace update maestro-ai-marketplace
 claude plugin update maestro-ai@maestro-ai-marketplace
 ```
 
-Reinicie o Claude Code para aplicar. O Claude Code usa o número da versão para saber se há novidade, então **toda mudança no plugin precisa de uma versão nova** (veja abaixo).
+Then restart Claude Code.
 
-## Publicar uma melhoria (fluxo de release)
+## Release flow
 
-1. Faça a mudança dentro de `maestro-ai/`.
-2. Suba a versão **nos dois lugares**: `maestro-ai/.claude-plugin/plugin.json` e `.claude-plugin/marketplace.json`.
-3. Registre no `CHANGELOG.md`.
-4. Rode os testes e a validação:
-   ```
-   python -m unittest discover -s tests -v
-   claude plugin validate .
-   ```
-5. Faça commit, crie a tag (`git tag v0.1.2`) e dê push (`git push --follow-tags`).
-6. Atualize as contas (seção anterior).
+1. Change the plugin.
+2. Bump `version` in both `maestro-ai/.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`.
+3. Add an entry to `CHANGELOG.md`.
+4. Run `python3 -m unittest discover -s tests -v` and `claude plugin validate .`.
+5. Commit, `git tag vX.Y.Z`, `git push --follow-tags`.
 
-Os testes falham se as versões estiverem fora de sincronia, se faltar a entrada no changelog ou se uma regra de segurança do desenho for quebrada (por exemplo, agentes de leitura com permissão de escrita).
+## Security note
 
-## Testes
+The plugin ships hooks that run local Python scripts (they block secrets and destructive commands, ask before using the Fable model, and warn about long conversations). Review them in `maestro-ai/hooks/` before using them in a corporate environment.
+
+## Structure
 
 ```
-python -m unittest discover -s tests -v
+.claude-plugin/marketplace.json
+maestro-ai/        the plugin (agents, skill, commands, hooks, templates)
+tests/             unit tests (also run by CI)
 ```
 
-Cobrem os hooks (proteção de segredos e comandos destrutivos, confirmação do Fable, aviso de conversa longa) e a estrutura do plugin. O CI do GitHub Actions roda os mesmos testes a cada push.
+See [maestro-ai/README.md](maestro-ai/README.md) for the plugin itself.
 
-Ainda não coberto: o comportamento dos agentes, comandos e hooks dentro de uma sessão real com um modelo.
+## License
 
-## Estrutura
-
-```
-.claude-plugin/marketplace.json   catálogo do marketplace
-maestro-ai/                       o plugin (agents, skills, commands, hooks, templates)
-tests/                            testes dos hooks e da estrutura
-CHANGELOG.md
-```
-
-## Licença
-
-A definir. Enquanto não houver um arquivo `LICENSE`, todos os direitos ficam reservados ao autor.
+To be defined.

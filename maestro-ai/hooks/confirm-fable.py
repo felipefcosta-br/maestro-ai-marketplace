@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""PreToolUse: exige confirmação do usuário sempre que um subagente for chamado com o modelo Fable."""
+"""PreToolUse: asks the user to confirm whenever a subagent is called with the Fable model."""
 import json
 import sys
 
 try:
     data = json.load(sys.stdin)
 except Exception:
+    sys.exit(0)
+if not isinstance(data, dict):
     sys.exit(0)
 
 tool_input = data.get("tool_input") or {}
@@ -17,8 +19,8 @@ if "fable" in model:
             "hookEventName": "PreToolUse",
             "permissionDecision": "ask",
             "permissionDecisionReason": (
-                "Esta chamada usa o modelo Fable (mais caro). "
-                "Aprove para continuar; se negar, o agente deve rodar em Opus."
+                "This call uses the Fable model (more expensive). "
+                "Approve to continue; if you deny, the agent should run on Opus."
             ),
         }
     }))

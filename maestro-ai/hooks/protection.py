@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PreToolUse: bloqueia acesso a segredos e comandos destrutivos."""
+"""PreToolUse: blocks access to secrets and destructive commands."""
 import json
 import re
 import sys
@@ -7,6 +7,8 @@ import sys
 try:
     data = json.load(sys.stdin)
 except Exception:
+    sys.exit(0)
+if not isinstance(data, dict):
     sys.exit(0)
 
 tool = data.get("tool_name", "")
@@ -24,7 +26,7 @@ def deny(reason):
     sys.exit(0)
 
 
-# Arquivos sensíveis (.env.example e similares são permitidos)
+# Sensitive files (.env.example and similar are allowed)
 SENSITIVE_PATH = re.compile(
     r"(^|/)(\.env(\.(?!example|sample|template)[\w.-]+)?"
     r"|id_(rsa|dsa|ecdsa|ed25519)"
@@ -37,34 +39,34 @@ SENSITIVE_PATH = re.compile(
     re.IGNORECASE,
 )
 
-# Comandos destrutivos
+# Destructive commands
 DESTRUCTIVE = [
     (r"\brm\s+(-[a-zA-Z]*\s+)*-[a-zA-Z]*[rR][a-zA-Z]*[fF]|\brm\s+(-[a-zA-Z]*\s+)*-[a-zA-Z]*[fF][a-zA-Z]*[rR]|\brm\s+.*--recursive.*--force|\brm\s+.*--force.*--recursive",
-     "rm -rf é bloqueado"),
-    (r"\bgit\s+push\b.*(--force\b|--force-with-lease\b|\s-f\b)", "git push --force é bloqueado"),
-    (r"\bgit\s+reset\s+--hard\b", "git reset --hard é bloqueado"),
-    (r"\bgit\s+clean\b.*-[a-zA-Z]*[fdx]", "git clean destrutivo é bloqueado"),
-    (r"\bdrop\s+(database|table|schema)\b", "DROP em banco de dados é bloqueado"),
-    (r"\bmkfs(\.\w+)?\b|\bdd\s+if=", "comando de disco destrutivo é bloqueado"),
-    (r"\bchmod\s+-R\s+777\b", "chmod -R 777 é bloqueado"),
-    (r"(curl|wget)\b[^|]*\|\s*(sudo\s+)?(ba)?sh\b", "baixar e executar script (curl | sh) é bloqueado"),
+     "rm -rf is blocked"),
+    (r"\bgit\s+push\b.*(--force\b|--force-with-lease\b|\s-f\b)", "git push --force is blocked"),
+    (r"\bgit\s+reset\s+--hard\b", "git reset --hard is blocked"),
+    (r"\bgit\s+clean\b.*-[a-zA-Z]*[fdx]", "destructive git clean is blocked"),
+    (r"\bdrop\s+(database|table|schema)\b", "DROP on a database is blocked"),
+    (r"\bmkfs(\.\w+)?\b|\bdd\s+if=", "destructive disk command is blocked"),
+    (r"\bchmod\s+-R\s+777\b", "chmod -R 777 is blocked"),
+    (r"(curl|wget)\b[^|]*\|\s*(sudo\s+)?(ba)?sh\b", "download-and-run (curl | sh) is blocked"),
 ]
 
 if tool in ("Read", "Edit", "Write", "NotebookEdit", "Grep", "Glob"):
     for key in ("file_path", "path", "notebook_path"):
         p = ti.get(key)
         if isinstance(p, str) and SENSITIVE_PATH.search(p.replace("\\", "/")):
-            deny("Acesso a arquivo de segredos bloqueado: " + p)
+            deny("Access to a secrets file is blocked: " + p)
 
 elif tool == "Bash":
     cmd = ti.get("command") or ""
     for pattern, reason in DESTRUCTIVE:
         if re.search(pattern, cmd, re.IGNORECASE):
-            deny("Comando bloqueado pelo maestro-ai: " + reason)
-    # leitura de segredos via shell
+            deny("Command blocked by maestro-ai: " + reason)
+    # reading secrets through the shell
     for token in re.split(r"[\s;|&<>()]+", cmd):
         token = token.strip("'\"")
         if token and SENSITIVE_PATH.search(token.replace("\\", "/")):
-            deny("Acesso a arquivo de segredos via shell bloqueado: " + token)
+            deny("Access to a secrets file through the shell is blocked: " + token)
 
 sys.exit(0)
