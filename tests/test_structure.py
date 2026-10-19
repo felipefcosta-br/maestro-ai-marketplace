@@ -111,6 +111,25 @@ class TestLanguageRule(unittest.TestCase):
         self.assertIn("Language:", read(os.path.join(PLUGIN, "commands", "save-context.md")))
 
 
+class TestNamedContexts(unittest.TestCase):
+    def test_commands_use_named_files(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("context-<name>.md", save)
+        self.assertIn("do not overwrite", save.lower())
+        self.assertIn("context-<name>.md", resume)
+        self.assertIn("context-*.md", resume)
+
+    def test_no_stale_single_context_path(self):
+        for path in text_files():
+            if os.path.basename(path) == "CHANGELOG.md":
+                continue
+            text = read(path)
+            for line in text.splitlines():
+                if ".maestro-ai/context.md" in line:
+                    self.assertIn("old", line.lower(), "%s: %s" % (path, line))
+
+
 class TestNaming(unittest.TestCase):
     def test_no_bare_maestro(self):
         for path in text_files():

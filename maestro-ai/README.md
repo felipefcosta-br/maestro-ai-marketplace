@@ -55,12 +55,12 @@ Copy `templates/AGENTS.md` into each repository and fill in the "Project" sectio
 
 ## Language
 
-If the user writes in English, everything is in English. If they write in another language and none is recorded, the main session asks once which language to use, then records it (`Language:` in `AGENTS.md` / `.maestro-ai/context.md`).
+If the user writes in English, everything is in English. If they write in another language and none is recorded, the main session asks once which language to use, then records it (`Language:` in `AGENTS.md` / the saved context file).
 
 ## Long conversations
 
-- `/maestro-ai:save-context` writes a summary to `.maestro-ai/context.md` (keep it out of Git).
-- `/maestro-ai:resume` continues from it in a clean session.
+- `/maestro-ai:save-context <name>` writes a summary to `.maestro-ai/context-<name>.md` (keep it out of Git). Use one name per conversation or topic so contexts never mix; an existing file is only updated when it is the same topic.
+- `/maestro-ai:resume <name>` continues from it in a clean session. Without a name it lists the saved contexts and asks which one (or uses the only one).
 - A hook warns when the conversation gets long: by transcript size if available (`MAESTRO_AI_LIMIT_KB`, default 600), otherwise every N messages (`MAESTRO_AI_LIMIT_MSGS`, default 30).
 
 ## Validate

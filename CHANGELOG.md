@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.0] - 2026-10-19
+### Changed
+- Named contexts: `/maestro-ai:save-context <name>` writes `.maestro-ai/context-<name>.md`, one file per conversation or topic, so contexts never mix. An existing file is updated only when it is the same topic; otherwise the command asks for another name.
+- `/maestro-ai:resume <name>` reads that file; without a name it lists the saved contexts and asks which one (or uses the only one). The old `.maestro-ai/context.md` is still accepted.
+
 ## [0.3.0] - 2026-10-16
 ### Added
 - Works beyond Claude Code: skills and commands run in Claude Desktop chat, claude.ai and Cowork; subagents and hooks stay Claude Code/Cowork only.

@@ -13,7 +13,7 @@ The main session is the orchestrator: it understands the task, splits it into st
 
 Decide the working language before anything else:
 
-1. If a language is already recorded (a `Language:` line in `AGENTS.md`, or in `.maestro-ai/context.md`), use it.
+1. If a language is already recorded (a `Language:` line in `AGENTS.md`, or in the saved context file `.maestro-ai/context-<name>.md`), use it.
 2. Otherwise, if the user is writing in English, use English and do not ask.
 3. Otherwise (the user writes in another language and nothing is recorded), ask once, before starting the work: which language they want for replies, briefings, agent reports and saved context. Offer their current language as the recommended option. Do not ask again in the same project; suggest recording the answer as a `Language:` line in `AGENTS.md` (and `save-context` records it in `context.md`).
 
@@ -92,7 +92,7 @@ For repeatable sequences use the plugin commands:
 ## 10. Long conversations and continuity
 
 Every reply resends the history, so long conversations get expensive and lose focus. When the conversation is long (the hook warns once), or when a big step is done:
-- Suggest `/maestro-ai:save-context` to the user. It writes the state to `.maestro-ai/context.md` (goal, decisions, next steps, key files, pitfalls).
-- Then continue in a clean session with `/maestro-ai:resume`, which reads only that file, checks the repository state and picks up from the next step.
+- Suggest `/maestro-ai:save-context <name>` to the user (one name per conversation or topic, so contexts never mix). It writes the state to a named file, `.maestro-ai/context-<name>.md` (goal, decisions, next steps, key files, pitfalls).
+- Then continue in a clean session with `/maestro-ai:resume <name>`, which reads only that file, checks the repository state and picks up from the next step.
 - The context file never contains secrets; `.maestro-ai/` should stay out of Git unless the user decides otherwise.
 - This complements the built-in `/compact`: the file is curated, persists across sessions, can be edited by you and works as a briefing for agents.

@@ -30,7 +30,7 @@
 - Broad tasks, more than 3 files or a lot of noise: delegate to the maestro-ai agents, following the `orchestration` skill (who does what, briefing, escalation, review).
 - **Architect:** before calling it, ask the user whether they want Fable or Opus, always including your recommendation.
 - Fixed workflows: `/maestro-ai:implement-test-review` and `/maestro-ai:pre-commit-review`.
-- Long conversation: `/maestro-ai:save-context` writes `.maestro-ai/context.md` and `/maestro-ai:resume` continues in a clean session. Keep `.maestro-ai/` out of Git.
+- Long conversation: `/maestro-ai:save-context <name>` writes `.maestro-ai/context-<name>.md` (one per conversation) and `/maestro-ai:resume <name>` continues in a clean session. Keep `.maestro-ai/` out of Git.
 
 ## Security
 - Never put credentials, tokens, keys, customer data or confidential information in this file, in briefings or in logs.
