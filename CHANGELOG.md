@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.2] - 2026-10-20
+### Added
+- Common folder `~/Documents/maestro-ai/`: `/maestro-ai:save-context` uses it when the working folder is a session folder (for example a Desktop agent-mode session), so a new session can find the context by name.
+- `Project:` and `Path:` lines in the context file. A later `save-context` with the same name updates the file at its `Path:`, so there is never a second copy.
+- The `session-start.py` hook also looks in the common folder (only contexts from the last 7 days, `MAESTRO_AI_RECENT_DAYS`).
+### Changed
+- `/maestro-ai:resume` searches `.maestro-ai/`, then the common folder, and works on the file where it is. It no longer offers to copy it.
+
+## [0.4.2] - 2026-10-20
+### Fixed
+- Desktop agent sessions: each session has its own temporary folder (`local-agent-mode-sessions/.../outputs`), so a context saved there was invisible to the next session. `/maestro-ai:save-context` now detects a session folder, gives the file to the user to download and says to keep it; the closing shows the full path.
+- `/maestro-ai:resume` now explains why a context was not found (temporary session folder or no file access) and asks the user to attach the file, paste it or give its full path.
+
 ## [0.4.1] - 2026-10-20
 ### Added
 - `LICENSE` (MIT) and `license` field in `plugin.json`; README security note says the protection hook is a safety net, not a guarantee.

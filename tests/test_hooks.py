@@ -159,7 +159,40 @@ class TestSessionStart(unittest.TestCase):
         return path
 
     def run_hook(self, payload):
-        return run("session-start.py", payload)
+        home = tempfile.mkdtemp()
+        self.home = home
+        return run("session-start.py", payload, {"HOME": home, "USERPROFILE": home})
+
+    def make_common(self, name, home, age_days=0):
+        folder = os.path.join(home, "Documents", "maestro-ai")
+        os.makedirs(folder, exist_ok=True)
+        path = os.path.join(folder, "context-%s.md" % name)
+        with open(path, "w") as f:
+            f.write("# Context: %s\n" % name)
+        if age_days:
+            t = os.path.getmtime(path) - age_days * 86400
+            os.utime(path, (t, t))
+        return path
+
+    def test_common_folder_recent_and_old(self):
+        home = tempfile.mkdtemp()
+        env = {"HOME": home, "USERPROFILE": home}
+        self.make_common("fresh-topic", home)
+        self.make_common("old-topic", home, age_days=30)
+        empty = tempfile.mkdtemp()
+        code, out = run("session-start.py", {"cwd": empty, "source": "startup"}, env)
+        self.assertEqual(code, 0)
+        text = out["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("fresh-topic", text)
+        self.assertNotIn("old-topic", text)
+
+    def test_common_folder_only_old_no_output(self):
+        home = tempfile.mkdtemp()
+        env = {"HOME": home, "USERPROFILE": home}
+        self.make_common("old-topic", home, age_days=30)
+        code, out = run("session-start.py", {"cwd": tempfile.mkdtemp(), "source": "startup"}, env)
+        self.assertEqual(code, 0)
+        self.assertIsNone(out)
 
     def test_no_contexts_no_output(self):
         code, out = self.run_hook({"cwd": self.dir, "source": "startup"})

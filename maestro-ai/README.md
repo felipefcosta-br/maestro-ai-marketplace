@@ -61,7 +61,9 @@ If the user writes in English, everything is in English. If they write in anothe
 
 - `/maestro-ai:save-context <name>` writes a summary to `.maestro-ai/context-<name>.md` (keep it out of Git). Use one name per conversation or topic so contexts never mix; an existing file is only updated when it is the same topic.
 - `/maestro-ai:resume <name>` continues from it in a clean session. Without a name it lists the saved contexts and asks which one (or uses the only one).
-- A hook offers to resume the latest saved context when you open a session in a folder that has one (no cost when there is none). If `resume` finds nothing in `.maestro-ai/`, it looks for `context-*.md` by name in the current folder and `~/Downloads` and asks which to use.
+- Where it is saved: `.maestro-ai/` in a lasting folder (a Git repository or a folder you connected); in a session folder (for example a Desktop agent-mode session) it goes to the common folder `~/Documents/maestro-ai/`, so a new session finds it by name. The file has `Project:` and `Path:` lines, and saving again with the same name updates it in place, so there is never a second copy.
+- A hook offers to resume the latest saved context when you open a session in a folder that has one, or when the common folder has one from the last 7 days (`MAESTRO_AI_RECENT_DAYS`); no cost when there is none. If `resume` finds nothing in either folder, it looks for `context-*.md` by name in the current folder and `~/Downloads` and asks which to use. In plain chat without file access, attach the file.
+- In Claude Desktop agent mode each session has its own temporary folder, so a context saved there is not visible to the next session. `save-context` detects this, hands you the file and tells you to keep it; in the new conversation attach it (or give its full path) and run `/maestro-ai:resume`.
 - A hook warns when the conversation gets long: by transcript size if available (`MAESTRO_AI_LIMIT_KB`, default 600), otherwise every N messages (`MAESTRO_AI_LIMIT_MSGS`, default 30).
 
 ## Validate

@@ -61,7 +61,9 @@ Se o usuário escreve em inglês, tudo é em inglês. Se escreve em outro idioma
 
 - `/maestro-ai:save-context <nome>` grava um resumo em `.maestro-ai/context-<nome>.md` (mantenha fora do Git). Use um nome por conversa ou assunto, para os contextos não se misturarem; um arquivo existente só é atualizado quando é o mesmo assunto.
 - `/maestro-ai:resume <nome>` continua a partir dele numa sessão limpa. Sem nome, lista os contextos salvos e pergunta qual usar (ou usa o único que existir).
-- Um hook oferece retomar o último contexto salvo ao abrir uma sessão numa pasta que tenha um (sem custo quando não há). Se o `resume` não achar nada em `.maestro-ai/`, procura `context-*.md` pelo nome na pasta atual e em `~/Downloads` e pergunta qual usar.
+- Onde é salvo: `.maestro-ai/` numa pasta duradoura (repositório Git ou pasta que você conectou); numa pasta de sessão (por exemplo, sessão em modo agente do Desktop) vai para a pasta comum `~/Documents/maestro-ai/`, para uma sessão nova achar pelo nome. O arquivo tem as linhas `Project:` e `Path:`, e salvar de novo com o mesmo nome atualiza o mesmo arquivo, sem criar segunda cópia.
+- Um hook oferece retomar o último contexto salvo ao abrir uma sessão numa pasta que tenha um, ou quando a pasta comum tem um dos últimos 7 dias (`MAESTRO_AI_RECENT_DAYS`); sem custo quando não há. Se o `resume` não achar nada em nenhuma das pastas, procura `context-*.md` pelo nome na pasta atual e em `~/Downloads` e pergunta qual usar. No chat sem acesso a arquivos, anexe o arquivo.
+- No modo agente do Claude Desktop cada sessão tem a sua pasta temporária, então um contexto salvo ali não aparece na sessão seguinte. O `save-context` detecta isso, entrega o arquivo e avisa para você guardá-lo; na conversa nova, anexe o arquivo (ou informe o caminho completo) e rode `/maestro-ai:resume`.
 - Um hook avisa quando a conversa fica longa: pelo tamanho do transcript, se disponível (`MAESTRO_AI_LIMIT_KB`, padrão 600), ou a cada N mensagens (`MAESTRO_AI_LIMIT_MSGS`, padrão 30).
 
 ## Validação

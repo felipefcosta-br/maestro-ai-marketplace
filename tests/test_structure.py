@@ -137,11 +137,29 @@ class TestRelease(unittest.TestCase):
         self.assertEqual(plugin.get("license"), "MIT")
         resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
         self.assertIn("~/Downloads", resume)
-        self.assertIn("copy only after the user agrees", resume)
+        self.assertIn("never copy it", resume)
+
+    def test_common_folder_and_path_line(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("~/Documents/maestro-ai/", save)
+        self.assertIn("~/Documents/maestro-ai/", resume)
+        self.assertIn("Path:", save)
+        self.assertIn("Never create a second copy", save)
 
     def test_save_context_closes_with_resume_line(self):
         save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
         self.assertIn("ready-to-paste command", save)
+
+
+class TestSessionFolders(unittest.TestCase):
+    def test_save_and_resume_handle_session_folders(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("local-agent-mode-sessions", save)
+        self.assertIn("belongs to this session only", save)
+        self.assertIn("attach", resume)
+        self.assertIn("full path", resume)
 
 
 class TestNaming(unittest.TestCase):

@@ -1,15 +1,21 @@
 ---
-description: Saves a named context summary (code or any other work) to .maestro-ai/context-<name>.md so work can continue in a new session without rereading the conversation
+description: Saves a named context summary (code or any other work) to context-<name>.md in .maestro-ai/ or the common folder so work can continue in a new session without rereading the conversation
 argument-hint: [name] [optional note, e.g. what to prioritize when resuming]
 ---
-Create (or update) a named context file, `.maestro-ai/context-<name>.md`, so the work can continue in a new session without rereading this conversation. Each conversation or topic has its own file, so contexts never mix. Arguments: $ARGUMENTS
+Create (or update) a named context file, `context-<name>.md`, so the work can continue in a new session without rereading this conversation. Each conversation or topic has its own file, so contexts never mix. Arguments: $ARGUMENTS
 
-This works in Claude Code and in chat. If you have a shell, save the file in the repository root (or the current folder outside a repository). If you do not (chat), create the file `context-<name>.md` with the file tool and give it to the user to download, or, if you cannot create files, show it in one code block.
+This works in Claude Code and in chat.
+
+**Where to save (one file per name, in one place only)**
+1. If `context-<name>.md` already exists, in `.maestro-ai/` or in `~/Documents/maestro-ai/`, update it where it is (see its `Path:` line). Never create a second copy.
+2. Otherwise, if the working folder is lasting (a Git repository, or a folder the user connected or chose), use `.maestro-ai/` in the repository root (or the current folder outside a repository).
+3. Otherwise (a session folder: its path contains `local-agent-mode-sessions` or ends in `/outputs`, or you cannot tell), use the common folder `~/Documents/maestro-ai/` (create it if needed). A session folder belongs to this session only, and a new session will not see it.
+4. If you have no shell or cannot write there (chat), create `context-<name>.md` with the file tool and give it to the user to download, or, if you cannot create files, show it in one code block.
 
 **Choosing the name**
 - If the first word of the arguments is a short slug (lowercase letters, digits and hyphens, at most 30 characters), it is the name and the rest is the user's note. Otherwise, the whole text is the note.
 - With no name, propose one from the topic (2-4 words, e.g. `qa-skill`, `login-refactor`) and use it.
-- With a shell, list `.maestro-ai/` first. If `context-<name>.md` already exists, update it only when this conversation is the one that wrote it (same topic, you can tell from its content). Otherwise do not overwrite: ask the user for a different name.
+- With a shell, list `.maestro-ai/` and `~/Documents/maestro-ai/` first. If `context-<name>.md` already exists, update it only when this conversation is the one that wrote or resumed it (same topic, you can tell from its content). Otherwise do not overwrite: ask the user for a different name.
 - Always state the final name in your closing lines, so the user can resume it later.
 
 Steps:
@@ -21,6 +27,8 @@ Steps:
 # Context: <name>
 
 Name: <name>
+Project: <repository or folder name this work belongs to, or n/a>
+Path: <full path where this file is saved, or n/a if it was only given for download>
 Updated at: <date and time>
 Language: <working language agreed with the user>
 Branch: <branch> | Last commit: <short hash and message> | Uncommitted changes: <yes/no, summary>
@@ -60,4 +68,4 @@ Rules:
 - Record only what matters to continue; do not copy large code excerpts.
 - Mark as "not verified" anything that could not be checked in the repository.
 
-3. **Close** with at most 5 lines: the file path (or where to download it), a summary of the state, and, as the last line, only the ready-to-paste command in a code block: `/maestro-ai:resume <name>` (in chat, add "attach the file"). The user continues in a clean session (`/clear` or a new conversation). In a repository, if `.maestro-ai/` is not in `.gitignore`, warn and ask whether it should be added; do not change `.gitignore` without confirmation.
+3. **Close** with at most 6 lines: the full path of the file (or where to download it), a summary of the state, and, as the last line, only the ready-to-paste command in a code block: `/maestro-ai:resume <name>` (in chat, add "attach the file"). If the file went to the common folder, add one line before the command: "Saved in the common folder, so a new session can find it by name." The user continues in a clean session (`/clear` or a new conversation). In a repository, if `.maestro-ai/` is not in `.gitignore`, warn and ask whether it should be added; do not change `.gitignore` without confirmation.
