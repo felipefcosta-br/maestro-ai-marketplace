@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.3] - 2026-10-20
+### Changed
+- `/maestro-ai:save-context` and `/maestro-ai:resume` ask the user to grant access to `~/Documents/maestro-ai` when the session cannot reach it, then retry; they fall back to the session folder and a downloadable file only if access is refused.
+- `/maestro-ai:save-context` closing line is always a single non-empty code block with the resume command.
+
 ## [0.4.2] - 2026-10-20
 ### Added
 - Common folder `~/Documents/maestro-ai/`: `/maestro-ai:save-context` uses it when the working folder is a session folder (for example a Desktop agent-mode session), so a new session can find the context by name.

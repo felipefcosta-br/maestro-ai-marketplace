@@ -10,6 +10,7 @@ This works in Claude Code and in chat.
 1. If `context-<name>.md` already exists, in `.maestro-ai/` or in `~/Documents/maestro-ai/`, update it where it is (see its `Path:` line). Never create a second copy.
 2. Otherwise, if the working folder is lasting (a Git repository, or a folder the user connected or chose), use `.maestro-ai/` in the repository root (or the current folder outside a repository).
 3. Otherwise (a session folder: its path contains `local-agent-mode-sessions` or ends in `/outputs`, or you cannot tell), use the common folder `~/Documents/maestro-ai/` (create it if needed). A session folder belongs to this session only, and a new session will not see it.
+   If you cannot write there because the folder is not accessible to this session, ask the user to grant access to `~/Documents/maestro-ai` (use your folder-access request tool if you have one, otherwise ask in plain words), wait for the answer and try again. Only if access is refused or impossible, save in the session folder and give the file to the user to download.
 4. If you have no shell or cannot write there (chat), create `context-<name>.md` with the file tool and give it to the user to download, or, if you cannot create files, show it in one code block.
 
 **Choosing the name**
@@ -68,4 +69,4 @@ Rules:
 - Record only what matters to continue; do not copy large code excerpts.
 - Mark as "not verified" anything that could not be checked in the repository.
 
-3. **Close** with at most 6 lines: the full path of the file (or where to download it), a summary of the state, and, as the last line, only the ready-to-paste command in a code block: `/maestro-ai:resume <name>` (in chat, add "attach the file"). If the file went to the common folder, add one line before the command: "Saved in the common folder, so a new session can find it by name." The user continues in a clean session (`/clear` or a new conversation). In a repository, if `.maestro-ai/` is not in `.gitignore`, warn and ask whether it should be added; do not change `.gitignore` without confirmation.
+3. **Close** with at most 6 lines: the full path of the file (or where to download it), a summary of the state, and, as the last line, only the ready-to-paste command in one code block that contains nothing else (never an empty code block): `/maestro-ai:resume <name>` (in chat, add "attach the file"). If the file went to the common folder, add one line before the command: "Saved in the common folder, so a new session can find it by name." The user continues in a clean session (`/clear` or a new conversation). In a repository, if `.maestro-ai/` is not in `.gitignore`, warn and ask whether it should be added; do not change `.gitignore` without confirmation.

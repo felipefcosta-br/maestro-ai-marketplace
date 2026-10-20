@@ -146,6 +146,9 @@ class TestRelease(unittest.TestCase):
         self.assertIn("~/Documents/maestro-ai/", resume)
         self.assertIn("Path:", save)
         self.assertIn("Never create a second copy", save)
+        self.assertIn("grant access", save)
+        self.assertIn("grant access", resume)
+        self.assertIn("never an empty code block", save)
 
     def test_save_context_closes_with_resume_line(self):
         save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
