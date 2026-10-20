@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1] - 2026-10-20
+### Added
+- `LICENSE` (MIT) and `license` field in `plugin.json`; README security note says the protection hook is a safety net, not a guarantee.
+- `session-start.py` hook: on a fresh session, if the folder has `.maestro-ai/context-*.md`, offers to resume the latest (no cost when there is none).
+- `/maestro-ai:resume` falls back to searching `context-*.md` by name in the current folder and `~/Downloads`, asks which to use and offers to copy it into `.maestro-ai/`.
+### Changed
+- `/maestro-ai:save-context` ends with a single ready-to-paste `/maestro-ai:resume <name>` line.
+
 ## [0.4.0] - 2026-10-19
 ### Changed
 - Named contexts: `/maestro-ai:save-context <name>` writes `.maestro-ai/context-<name>.md`, one file per conversation or topic, so contexts never mix. An existing file is updated only when it is the same topic; otherwise the command asks for another name.

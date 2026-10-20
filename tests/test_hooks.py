@@ -146,5 +146,48 @@ class TestContextWarning(unittest.TestCase):
             self.assertEqual(code, 0)
 
 
+class TestSessionStart(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+
+    def make(self, name):
+        folder = os.path.join(self.dir, ".maestro-ai")
+        os.makedirs(folder, exist_ok=True)
+        path = os.path.join(folder, "context-%s.md" % name)
+        with open(path, "w") as f:
+            f.write("# Context: %s\n" % name)
+        return path
+
+    def run_hook(self, payload):
+        return run("session-start.py", payload)
+
+    def test_no_contexts_no_output(self):
+        code, out = self.run_hook({"cwd": self.dir, "source": "startup"})
+        self.assertEqual(code, 0)
+        self.assertIsNone(out)
+
+    def test_offers_latest_context(self):
+        old = self.make("old-topic")
+        os.utime(old, (1, 1))
+        self.make("qa-skill")
+        code, out = self.run_hook({"cwd": self.dir, "source": "startup"})
+        self.assertEqual(code, 0)
+        text = out["hookSpecificOutput"]["additionalContext"]
+        self.assertEqual(out["hookSpecificOutput"]["hookEventName"], "SessionStart")
+        self.assertIn("/maestro-ai:resume qa-skill", text)
+        self.assertIn("old-topic", text)
+
+    def test_skips_resumed_and_compacted(self):
+        self.make("qa-skill")
+        for source in ("resume", "compact"):
+            code, out = self.run_hook({"cwd": self.dir, "source": source})
+            self.assertEqual(code, 0)
+            self.assertIsNone(out)
+
+    def test_invalid_input(self):
+        code, _ = run("session-start.py", None, raw="garbage")
+        self.assertEqual(code, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -61,6 +61,7 @@ If the user writes in English, everything is in English. If they write in anothe
 
 - `/maestro-ai:save-context <name>` writes a summary to `.maestro-ai/context-<name>.md` (keep it out of Git). Use one name per conversation or topic so contexts never mix; an existing file is only updated when it is the same topic.
 - `/maestro-ai:resume <name>` continues from it in a clean session. Without a name it lists the saved contexts and asks which one (or uses the only one).
+- A hook offers to resume the latest saved context when you open a session in a folder that has one (no cost when there is none). If `resume` finds nothing in `.maestro-ai/`, it looks for `context-*.md` by name in the current folder and `~/Downloads` and asks which to use.
 - A hook warns when the conversation gets long: by transcript size if available (`MAESTRO_AI_LIMIT_KB`, default 600), otherwise every N messages (`MAESTRO_AI_LIMIT_MSGS`, default 30).
 
 ## Validate

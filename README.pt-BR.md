@@ -32,7 +32,7 @@ Depois reinicie o Claude Code.
 
 ## Nota de segurança
 
-O plugin inclui hooks que executam scripts Python locais (bloqueiam segredos e comandos destrutivos, pedem confirmação antes de usar o Fable e avisam sobre conversas longas). Revise-os em `maestro-ai/hooks/` antes de usar em ambiente corporativo.
+O plugin inclui hooks que executam scripts Python locais (bloqueiam segredos e comandos destrutivos, pedem confirmação antes de usar o Fable, avisam sobre conversas longas e oferecem retomar um contexto salvo). Revise-os em `maestro-ai/hooks/` antes de usar em ambiente corporativo. O hook de proteção compara padrões de texto: é uma rede de segurança, não uma garantia, e pode ser contornado. Mantenha suas próprias regras de permissão e revise o que os agentes fazem.
 
 ## Estrutura
 
@@ -46,4 +46,4 @@ Veja [maestro-ai/README.pt-BR.md](maestro-ai/README.pt-BR.md) para o plugin em s
 
 ## Licença
 
-A definir.
+[MIT](LICENSE).

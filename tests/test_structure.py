@@ -33,7 +33,7 @@ def frontmatter(path):
 
 
 def text_files():
-    skip = {".git", "__pycache__", "tests"}
+    skip = {".git", "__pycache__", "tests", ".maestro-ai"}
     for base, dirs, files in os.walk(ROOT):
         dirs[:] = [d for d in dirs if d not in skip]
         for name in files:
@@ -97,7 +97,7 @@ class TestSkillCommandsHooks(unittest.TestCase):
     def test_hook_scripts_exist(self):
         hooks = load_json(os.path.join(PLUGIN, "hooks", "hooks.json"))
         scripts = re.findall(r"hooks/([\w.-]+\.py)", json.dumps(hooks))
-        self.assertEqual(len(scripts), 3)
+        self.assertEqual(len(scripts), 4)
         for s in scripts:
             self.assertTrue(os.path.isfile(os.path.join(PLUGIN, "hooks", s)), s)
 
@@ -128,6 +128,20 @@ class TestNamedContexts(unittest.TestCase):
             for line in text.splitlines():
                 if ".maestro-ai/context.md" in line:
                     self.assertIn("old", line.lower(), "%s: %s" % (path, line))
+
+
+class TestRelease(unittest.TestCase):
+    def test_license_and_resume_fallback(self):
+        self.assertIn("MIT License", read(os.path.join(ROOT, "LICENSE")))
+        plugin = load_json(os.path.join(PLUGIN, ".claude-plugin", "plugin.json"))
+        self.assertEqual(plugin.get("license"), "MIT")
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("~/Downloads", resume)
+        self.assertIn("copy only after the user agrees", resume)
+
+    def test_save_context_closes_with_resume_line(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        self.assertIn("ready-to-paste command", save)
 
 
 class TestNaming(unittest.TestCase):

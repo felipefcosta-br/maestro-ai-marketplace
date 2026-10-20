@@ -60,4 +60,4 @@ Rules:
 - Record only what matters to continue; do not copy large code excerpts.
 - Mark as "not verified" anything that could not be checked in the repository.
 
-3. **Close** with at most 5 lines: the file path (or where to download it), the context name, a summary of the state, and the suggestion to continue in a clean session (`/clear` or a new conversation) with `/maestro-ai:resume <name>`, attaching the file in chat. In a repository, if `.maestro-ai/` is not in `.gitignore`, warn and ask whether it should be added; do not change `.gitignore` without confirmation.
+3. **Close** with at most 5 lines: the file path (or where to download it), a summary of the state, and, as the last line, only the ready-to-paste command in a code block: `/maestro-ai:resume <name>` (in chat, add "attach the file"). The user continues in a clean session (`/clear` or a new conversation). In a repository, if `.maestro-ai/` is not in `.gitignore`, warn and ask whether it should be added; do not change `.gitignore` without confirmation.
