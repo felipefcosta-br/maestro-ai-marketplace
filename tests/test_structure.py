@@ -167,6 +167,14 @@ class TestRelease(unittest.TestCase):
         self.assertIn("never overwriting", save)
         self.assertIn("~/Documents/maestro-ai/*/", resume)
 
+    def test_gitignore_inside_folder_and_backup_not_delete(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        self.assertIn("`.maestro-ai/.gitignore`", save)
+        self.assertIn("single line `*`", save)
+        self.assertIn("Never edit the project's own `.gitignore`", save)
+        self.assertIn("context.md.bak", save)
+        self.assertNotIn("ask whether it should be added", save)
+
     def test_save_context_closes_with_resume_line(self):
         save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
         self.assertIn("ready-to-paste command", save)

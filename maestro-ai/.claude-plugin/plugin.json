@@ -1,6 +1,6 @@
 {
   "name": "maestro-ai",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "license": "MIT",
   "description": "A team of subagents for software development: research, implementation, testing, review and model escalation by complexity.",
   "author": {

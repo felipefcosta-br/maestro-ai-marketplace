@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.6] - 2026-10-21
+### Changed
+- `/maestro-ai:save-context` keeps `.maestro-ai/` out of Git by writing `.maestro-ai/.gitignore` (a single `*`) inside the folder, without asking and without touching the project's `.gitignore` or any global Git setting. It no longer asks about `.gitignore`.
+- An old `.maestro-ai/context.md` that the new file replaces is renamed to `context.md.bak` instead of being deleted or asked about.
+
 ## [0.4.5] - 2026-10-21
 ### Added
 - Common folder organized by subject: `~/Documents/maestro-ai/<subject>/context-<name>.md` (subject = the `Project:` value). Several contexts of one subject share a folder.
