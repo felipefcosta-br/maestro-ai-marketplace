@@ -150,6 +150,23 @@ class TestRelease(unittest.TestCase):
         self.assertIn("grant access", resume)
         self.assertIn("never an empty code block", save)
 
+    def test_verification_and_files_to_keep(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("## Verified vs assumed", save)
+        self.assertIn("## Files to keep", save)
+        self.assertIn("not as facts", resume)
+        self.assertIn("Files to keep", resume)
+        self.assertIn("assumed", resume)
+
+    def test_subject_folders_and_files(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("~/Documents/maestro-ai/<subject>/context-<name>.md", save)
+        self.assertIn("~/Documents/maestro-ai/<subject>/files/", save)
+        self.assertIn("never overwriting", save)
+        self.assertIn("~/Documents/maestro-ai/*/", resume)
+
     def test_save_context_closes_with_resume_line(self):
         save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
         self.assertIn("ready-to-paste command", save)

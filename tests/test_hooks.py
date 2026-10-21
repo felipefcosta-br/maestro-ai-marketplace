@@ -186,6 +186,26 @@ class TestSessionStart(unittest.TestCase):
         self.assertIn("fresh-topic", text)
         self.assertNotIn("old-topic", text)
 
+    def test_subject_folders_one_per_subject(self):
+        home = tempfile.mkdtemp()
+        env = {"HOME": home, "USERPROFILE": home}
+        base = os.path.join(home, "Documents", "maestro-ai")
+        for subject, name in (("skill-qa", "skill-qa"), ("skill-qa", "skill-qa-review"), ("plugin", "plugin-main")):
+            folder = os.path.join(base, subject)
+            os.makedirs(folder, exist_ok=True)
+            path = os.path.join(folder, "context-%s.md" % name)
+            with open(path, "w") as f:
+                f.write("x")
+            if name == "skill-qa":
+                older = os.path.getmtime(path) - 3600
+                os.utime(path, (older, older))
+        code, out = run("session-start.py", {"cwd": tempfile.mkdtemp(), "source": "startup"}, env)
+        self.assertEqual(code, 0)
+        text = out["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("skill-qa-review", text)
+        self.assertIn("plugin-main", text)
+        self.assertNotIn("skill-qa (", text)
+
     def test_common_folder_only_old_no_output(self):
         home = tempfile.mkdtemp()
         env = {"HOME": home, "USERPROFILE": home}

@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.5] - 2026-10-21
+### Added
+- Common folder organized by subject: `~/Documents/maestro-ai/<subject>/context-<name>.md` (subject = the `Project:` value). Several contexts of one subject share a folder.
+- `/maestro-ai:save-context` copies the working files the next step needs to `<subject>/files/` when the common folder is accessible and the files are small and not sensitive (never overwriting; it lists them otherwise, and records how to recreate regenerable ones).
+### Changed
+- `/maestro-ai:resume` also searches the subject folders (one level down) and lists contexts grouped by subject.
+- `session-start.py` looks in the subject folders too and offers at most the latest context of each subject.
+
+## [0.4.4] - 2026-10-21
+### Added
+- Context file sections `Verified vs assumed` (each claim marked verified, with how it was checked, or assumed) and `Files to keep` (files the next step needs that would not survive in a session folder).
+### Changed
+- `/maestro-ai:resume` treats the context as notes, not facts: it checks that the listed files exist and asks for the missing ones up front, tests the assumptions that block the next step, asks when a pasted result contradicts the context or looks incomplete, and separates what it confirmed now from what it inherited.
+
 ## [0.4.3] - 2026-10-20
 ### Changed
 - `/maestro-ai:save-context` and `/maestro-ai:resume` ask the user to grant access to `~/Documents/maestro-ai` when the session cannot reach it, then retry; they fall back to the session folder and a downloadable file only if access is refused.
