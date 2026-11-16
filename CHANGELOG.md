@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.4.11] - 2026-11-15
+### Changed
+- After saving the context, the long-conversation warning tells Claude to call a `clear_conversation` tool when one is available (provided by an optional companion mod), so the conversation is cleared with no extra step; without it, the user types `/clear` as before.
+
+## [0.4.10] - 2026-11-15
+### Changed
+- The long-conversation warning no longer fires only once per session: after the first warning at `MAESTRO_AI_LIMIT_KB` (default 600 KB) it fires again each time the transcript grows by another `MAESTRO_AI_LIMIT_KB`, so choosing "Not now" does not silence a very long session for good.
+
+## [0.4.9] - 2026-11-15
+### Changed
+- The long-conversation warning asks once with buttons (AskUserQuestion: Save context and clear / Not now) instead of a text suggestion. On accept it saves the context; the user then types `/clear`, which a plugin cannot run. Falls back to a text suggestion when the tool is not available.
+
+## [0.4.8] - 2026-11-15
+### Changed
+- Long-conversation warning now suggests `/maestro-ai:save-context <name>` followed by `/clear` in the same session (the start-of-session hook then offers `/maestro-ai:resume`), instead of opening a new conversation.
+
+## [0.4.7] - 2026-10-21
+### Changed
+- Single destination: `/maestro-ai:save-context` always writes to the common folder (`~/Documents/maestro-ai/<subject>/`), whatever the working folder is, so `resume` finds it from any session. A project's `.maestro-ai/` is only the fallback when access to the common folder is refused, and it is still read for older contexts.
+- `/maestro-ai:resume` offers to move a context found in a project's `.maestro-ai/` to the common folder (only after the user agrees) and corrects a stale `Path:` line.
+
 ## [0.4.6] - 2026-10-21
 ### Changed
 - `/maestro-ai:save-context` keeps `.maestro-ai/` out of Git by writing `.maestro-ai/.gitignore` (a single `*`) inside the folder, without asking and without touching the project's `.gitignore` or any global Git setting. It no longer asks about `.gitignore`.

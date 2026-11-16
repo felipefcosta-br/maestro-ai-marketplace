@@ -107,6 +107,9 @@ class TestContextWarning(unittest.TestCase):
         text = out["hookSpecificOutput"]["additionalContext"]
         self.assertIn("/maestro-ai:save-context", text)
         self.assertIn("/maestro-ai:resume", text)
+        self.assertIn("/clear", text)
+        self.assertIn("AskUserQuestion", text)
+        self.assertIn("clear_conversation", text)
         return True
 
     def test_plan_a_warns_once(self):
@@ -119,6 +122,18 @@ class TestContextWarning(unittest.TestCase):
         _, second = run("context-warning.py", payload, env)
         self.assertTrue(self.warned(first))
         self.assertFalse(self.warned(second))
+
+    def test_plan_a_warns_again_after_more_growth(self):
+        transcript = os.path.join(self.tmp, "t.jsonl")
+        env = dict(self.env, MAESTRO_AI_LIMIT_KB="1")
+        payload = {"session_id": "s9", "transcript_path": transcript}
+        sizes = [3, 3.5, 4.5, 4.9, 6]
+        results = []
+        for kb in sizes:
+            with open(transcript, "w") as f:
+                f.write("x" * int(kb * 1024))
+            results.append(self.warned(run("context-warning.py", payload, env)[1]))
+        self.assertEqual(results, [True, False, True, False, True])
 
     def test_plan_a_below_limit(self):
         transcript = os.path.join(self.tmp, "t.jsonl")

@@ -166,6 +166,8 @@ class TestRelease(unittest.TestCase):
         self.assertIn("~/Documents/maestro-ai/<subject>/files/", save)
         self.assertIn("never overwriting", save)
         self.assertIn("~/Documents/maestro-ai/*/", resume)
+        self.assertIn("always, whatever the working folder is", save)
+        self.assertIn("move it only after the user agrees", resume)
 
     def test_gitignore_inside_folder_and_backup_not_delete(self):
         save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
@@ -184,7 +186,6 @@ class TestSessionFolders(unittest.TestCase):
     def test_save_and_resume_handle_session_folders(self):
         save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
         resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
-        self.assertIn("local-agent-mode-sessions", save)
         self.assertIn("belongs to this session only", save)
         self.assertIn("attach", resume)
         self.assertIn("full path", resume)

@@ -1,5 +1,5 @@
 ---
-description: Saves a named context summary (code or any other work) to context-<name>.md in .maestro-ai/ or the common folder so work can continue in a new session without rereading the conversation
+description: Saves a named context summary (code or any other work) to context-<name>.md in the common folder (~/Documents/maestro-ai/<subject>/) so work can continue in a new session without rereading the conversation
 argument-hint: [name] [optional note, e.g. what to prioritize when resuming]
 ---
 Create (or update) a named context file, `context-<name>.md`, so the work can continue in a new session without rereading this conversation. Each conversation or topic has its own file, so contexts never mix. Arguments: $ARGUMENTS
@@ -8,9 +8,9 @@ This works in Claude Code and in chat.
 
 **Where to save (one file per name, in one place only)**
 1. If `context-<name>.md` already exists, in `.maestro-ai/`, in `~/Documents/maestro-ai/` or in one of its subject folders (`~/Documents/maestro-ai/<subject>/`), update it where it is (see its `Path:` line). Never create a second copy.
-2. Otherwise, if the working folder is lasting (a Git repository, or a folder the user connected or chose), use `.maestro-ai/` in the repository root (or the current folder outside a repository).
-3. Otherwise (a session folder: its path contains `local-agent-mode-sessions` or ends in `/outputs`, or you cannot tell), use the common folder, organized by subject: `~/Documents/maestro-ai/<subject>/context-<name>.md` (create the folders if needed). The subject is the `Project:` value in lowercase letters, digits and hyphens (at most 30 characters). Reuse an existing subject folder that fits; if none fits or you are unsure, propose a subject and ask. Several contexts (conversations) of the same subject share one folder. A session folder belongs to this session only, and a new session will not see it.
-   If you cannot write there because the folder is not accessible to this session, ask the user to grant access to `~/Documents/maestro-ai` (use your folder-access request tool if you have one, otherwise ask in plain words), wait for the answer and try again. Only if access is refused or impossible, save in the session folder and give the file to the user to download.
+2. Otherwise save in the common folder, always, whatever the working folder is (a repository, a connected folder or a session folder), so that `resume` finds it from any session. It is organized by subject: `~/Documents/maestro-ai/<subject>/context-<name>.md` (create the folders if needed). A project's own `.maestro-ai/` is no longer the destination; it is only read for contexts saved by older versions. The subject is the `Project:` value in lowercase letters, digits and hyphens (at most 30 characters). Reuse an existing subject folder that fits; if none fits or you are unsure, propose a subject and ask. Several contexts (conversations) of the same subject share one folder. A session folder belongs to this session only, and a new session will not see it.
+   If you cannot write there because the folder is not accessible to this session, ask the user to grant access to `~/Documents/maestro-ai` (use your folder-access request tool if you have one, otherwise ask in plain words), wait for the answer and try again. Only if access is refused or impossible, fall back to item 3 and, failing that, give the file to the user to download.
+3. If the common folder is not accessible and access is refused, use `.maestro-ai/` in a lasting folder (a Git repository or a folder the user connected) and say clearly that the context will only be found when a session is opened in that folder.
 4. If you have no shell or cannot write there (chat), create `context-<name>.md` with the file tool and give it to the user to download, or, if you cannot create files, show it in one code block.
 
 **Choosing the name**
@@ -22,7 +22,7 @@ This works in Claude Code and in chat.
 Steps:
 
 1. **Check the real state** instead of relying only on the conversation. With a shell in a Git repository: run `git status --short`, `git branch --show-current` and `git log --oneline -5`, and `git diff --stat` if there are changes. Without a shell, or outside a repository, skip this and write `Branch: n/a`.
-1b. **Keep the folder out of Git without touching the project.** Whenever you create or write inside a `.maestro-ai/` folder, make sure it contains a file `.maestro-ai/.gitignore` with the single line `*` (create it if missing). It makes Git ignore everything in that folder, including itself. Never edit the project's own `.gitignore` or any global Git setting.
+1b. **Keep any `.maestro-ai/` folder out of Git without touching the project.** Whenever you create or write inside a `.maestro-ai/` folder (the fallback or an old one you update), make sure it contains a file `.maestro-ai/.gitignore` with the single line `*` (create it if missing). It makes Git ignore everything in that folder, including itself. Never edit the project's own `.gitignore` or any global Git setting.
 2. **Write the file** in the working language defined in the `orchestration` skill (section 0) (create the `.maestro-ai/` folder if needed; if the file already exists and is the same topic, update it instead of duplicating). Use exactly this structure, at most ~70 lines:
 
 ```
