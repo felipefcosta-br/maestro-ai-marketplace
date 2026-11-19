@@ -39,7 +39,6 @@ The plugin ships hooks that run local Python scripts (they block secrets and des
 ```
 .claude-plugin/marketplace.json
 maestro-ai/        the plugin (agents, skill, commands, hooks, templates)
-maestro-ai-clear/  optional mod: save context, clear and resume in one step
 tests/             unit tests (also run by CI)
 ```
 

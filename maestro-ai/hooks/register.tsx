@@ -4,10 +4,10 @@ import type { Register } from 'claude-code'
 // The band shows once the conversation has this many user turns.
 const MIN_TURNS = 15
 
-const isHidden = atom({ plugin: 'maestro-ai-clear', key: 'isHidden' } as const, false)
-const isSaving = atom({ plugin: 'maestro-ai-clear', key: 'isSaving' } as const, false)
+const isHidden = atom({ plugin: 'maestro-ai', key: 'isHidden' } as const, false)
+const isSaving = atom({ plugin: 'maestro-ai', key: 'isSaving' } as const, false)
 // Name of the saved context to resume once the conversation is cleared ('' = none).
-const resumeName = atom({ plugin: 'maestro-ai-clear', key: 'resumeName' } as const, '')
+const resumeName = atom({ plugin: 'maestro-ai', key: 'resumeName' } as const, '')
 
 // `/maestro-ai:resume <name>` as the save-context command prints it on its last line.
 const RESUME_LINE = /\/maestro-ai:resume\s+([^\s`'"]+)/
@@ -26,7 +26,11 @@ const resumeSaved = async ($: any) => {
   }
 }
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
+  // Option "saveAndClear" (maestro-ai config): false turns the whole feature off, and
+  // the hooks of the plugin keep working without it.
+  if (options.saveAndClear === false) return
+
   // Set when a save-and-clear was started (button or tool); cleared when the turn ends.
   let pending = false
 
@@ -43,7 +47,7 @@ export const register: Register = on => {
     return result
   })
 
-  on('tool.call', { tool: /^mcp__maestro-ai-clear__clear_conversation$/ }, async $ => {
+  on('tool.call', { tool: /^mcp__maestro-ai__clear_conversation$/ }, async $ => {
     pending = true
     await update($, isSaving, () => true)
 
@@ -136,7 +140,7 @@ export const register: Register = on => {
             } catch {
               pending = false
               await update($, isSaving, () => false)
-              $.ui.toast('Could not start /maestro-ai:save-context. Is the maestro-ai plugin installed?')
+              $.ui.toast('Could not start /maestro-ai:save-context. Is the maestro-ai plugin up to date?')
             }
           }}
         />

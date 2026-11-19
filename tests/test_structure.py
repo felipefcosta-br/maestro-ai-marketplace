@@ -213,9 +213,6 @@ class TestNaming(unittest.TestCase):
             self.assertIsNone(re.search(old, read(path), re.I), path)
 
 
-MOD = os.path.join(ROOT, "maestro-ai-clear")
-
-
 class TestAutoResume(unittest.TestCase):
     def test_save_context_writes_marker_and_forbids_code_in_context(self):
         save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
@@ -234,33 +231,40 @@ class TestAutoResume(unittest.TestCase):
         self.assertIn('"clear"', hook)
 
 
-class TestClearMod(unittest.TestCase):
-    def test_manifest_and_marketplace(self):
-        mod = load_json(os.path.join(MOD, ".claude-plugin", "plugin.json"))
+class TestClearModIntegrated(unittest.TestCase):
+    def test_no_separate_plugin_left(self):
         market = load_json(os.path.join(ROOT, ".claude-plugin", "marketplace.json"))
-        entry = [p for p in market["plugins"] if p["name"] == mod["name"]]
-        self.assertEqual(mod["name"], "maestro-ai-clear")
-        self.assertEqual(len(entry), 1)
-        self.assertEqual(entry[0]["version"], mod["version"])
-        self.assertEqual(entry[0]["source"], "./maestro-ai-clear")
+        self.assertEqual([p["name"] for p in market["plugins"]], ["maestro-ai"])
+        self.assertFalse(os.path.exists(os.path.join(ROOT, "maestro-ai-clear")))
 
-    def test_hooks_module_exists(self):
-        hooks = load_json(os.path.join(MOD, "hooks", "hooks.json"))
+    def test_hooks_json_has_hooks_and_module(self):
+        hooks = load_json(os.path.join(PLUGIN, "hooks", "hooks.json"))
+        self.assertIn("hooks", hooks)
         for module in hooks["modules"]:
-            self.assertTrue(os.path.isfile(os.path.join(MOD, "hooks", module)), module)
+            self.assertTrue(os.path.isfile(os.path.join(PLUGIN, "hooks", module)), module)
 
-    def test_register_uses_own_plugin_name_and_resumes(self):
-        code = read(os.path.join(MOD, "hooks", "register.tsx"))
+    def test_manifest_declares_types_and_option(self):
+        manifest = load_json(os.path.join(PLUGIN, ".claude-plugin", "plugin.json"))
+        self.assertEqual(manifest["types"], "./types/index.d.ts")
+        field = manifest["userConfig"]["saveAndClear"]
+        self.assertEqual(field["type"], "boolean")
+        self.assertIs(field["default"], True)
+
+    def test_register_belongs_to_maestro_ai_and_honors_option(self):
+        code = read(os.path.join(PLUGIN, "hooks", "register.tsx"))
+        self.assertNotIn("maestro-ai-clear", code)
         self.assertNotIn("'maestro-clear'", code)
-        self.assertIn("mcp__maestro-ai-clear__clear_conversation", code)
+        self.assertIn("mcp__maestro-ai__clear_conversation", code)
+        self.assertIn("options.saveAndClear === false", code)
         self.assertIn("maestro-ai:resume", code)
-        self.assertIn("clear_conversation", code)
-        types = read(os.path.join(MOD, "types", "index.d.ts"))
-        self.assertIn("'maestro-ai-clear'", types)
+        types = read(os.path.join(PLUGIN, "types", "index.d.ts"))
+        self.assertIn("'maestro-ai'", types)
         self.assertIn("resumeName", types)
 
-    def test_changelog_mentions_mod(self):
-        self.assertIn("maestro-ai-clear", read(os.path.join(ROOT, "CHANGELOG.md")))
+    def test_changelog_explains_migration(self):
+        log = read(os.path.join(ROOT, "CHANGELOG.md"))
+        self.assertIn("maestro-ai-clear", log)
+        self.assertIn("uninstall", log.lower())
 
 
 class TestIntentPreserved(unittest.TestCase):

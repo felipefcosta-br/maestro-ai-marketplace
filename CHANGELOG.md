@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0] - 2026-11-19
+### Changed
+- **The `maestro-ai-clear` mod is now part of `maestro-ai`.** One plugin, one install, one version: the "Save context and clear" band, the `clear_conversation` tool and the automatic `/maestro-ai:resume` after the clear ship inside `maestro-ai` (`hooks/register.tsx`, `types/`). The tool is now `mcp__maestro-ai__clear_conversation`.
+- New option `saveAndClear` (default on) in the plugin's configuration. Turn it off to keep only the hooks, agents and commands; the mod then registers nothing.
+- **Migration:** uninstall the separate plugin (`claude plugin uninstall maestro-ai-clear@maestro-ai-marketplace`), then update `maestro-ai`. Keeping both would show the band twice. `maestro-ai-clear` 0.1.0 is removed from the marketplace.
+- The mod's code runs only where the host loads hooks modules (Claude Code). Elsewhere (chat, claude.ai) the plugin's skills and commands work as before.
+
 ## [0.5.1] - 2026-11-19
 ### Changed
 - Saved contexts keep the user's intent. New section `Intent and success criteria (user's words)`: short verbatim quotes of what the user asked for and why, plus a `Done when` line. `/maestro-ai:save-context` re-reads the user's requests across the whole conversation (not only the last task), copies the section unchanged when updating, and checks that Goal, Decisions and Next steps still lead to `Done when`.
