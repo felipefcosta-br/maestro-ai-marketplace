@@ -257,5 +257,103 @@ class TestSessionStart(unittest.TestCase):
         self.assertEqual(code, 0)
 
 
+class TestAutoResumeAfterClear(unittest.TestCase):
+    def setUp(self):
+        self.home = tempfile.mkdtemp()
+        self.env = {"HOME": self.home, "USERPROFILE": self.home}
+        self.cwd = tempfile.mkdtemp()
+
+    def context(self, folder, name, age_seconds=0):
+        os.makedirs(folder, exist_ok=True)
+        path = os.path.join(folder, "context-%s.md" % name)
+        with open(path, "w") as f:
+            f.write("# Context: %s\n" % name)
+        if age_seconds:
+            t = os.path.getmtime(path) - age_seconds
+            os.utime(path, (t, t))
+        return path
+
+    def marker(self, name, path, age_seconds=0):
+        folder = os.path.join(self.home, ".maestro-ai")
+        os.makedirs(folder, exist_ok=True)
+        marker = os.path.join(folder, "pending-resume.json")
+        with open(marker, "w") as f:
+            json.dump({"name": name, "path": path, "saved_at": "now"}, f)
+        if age_seconds:
+            t = os.path.getmtime(marker) - age_seconds
+            os.utime(marker, (t, t))
+        return marker
+
+    def start(self, source="clear"):
+        return run("session-start.py", {"cwd": self.cwd, "source": source}, self.env)
+
+    def text(self, out):
+        return out["hookSpecificOutput"]["additionalContext"]
+
+    def test_marker_resumes_without_asking_and_is_consumed(self):
+        # The context lives in another folder than the session's (the real failure case).
+        path = self.context(os.path.join(tempfile.mkdtemp(), "repo", ".maestro-ai"), "my-work")
+        marker = self.marker("my-work", path)
+        code, out = self.start("clear")
+        self.assertEqual(code, 0)
+        text = self.text(out)
+        self.assertIn("without asking for confirmation", text)
+        self.assertIn(path, text)
+        self.assertIn("my-work", text)
+        self.assertNotIn("offer", text)
+        self.assertFalse(os.path.exists(marker))
+
+    def test_marker_used_once(self):
+        path = self.context(os.path.join(self.home, "Documents", "maestro-ai", "subj"), "once", age_seconds=3600)
+        self.marker("once", path)
+        _, first = self.start("clear")
+        self.assertIn("without asking for confirmation", self.text(first))
+        _, second = self.start("clear")
+        self.assertNotIn("without asking for confirmation", self.text(second) if second else "")
+
+    def test_stale_marker_is_ignored(self):
+        path = self.context(os.path.join(self.home, "Documents", "maestro-ai", "subj"), "old", age_seconds=7200)
+        self.marker("old", path, age_seconds=7200)
+        _, out = self.start("clear")
+        self.assertNotIn("without asking for confirmation", self.text(out) if out else "")
+
+    def test_marker_pointing_to_missing_file_is_ignored(self):
+        self.marker("ghost", os.path.join(self.home, "nope", "context-ghost.md"))
+        _, out = self.start("clear")
+        self.assertIsNone(out)
+
+    def test_no_marker_uses_freshly_saved_context_one_folder_down(self):
+        # Session opens in the parent of the repository where the context was saved.
+        self.context(os.path.join(self.cwd, "repo", ".maestro-ai"), "fresh-one")
+        _, out = self.start("clear")
+        text = self.text(out)
+        self.assertIn("without asking for confirmation", text)
+        self.assertIn("fresh-one", text)
+
+    def test_no_marker_old_context_only_offers(self):
+        self.context(os.path.join(self.cwd, ".maestro-ai"), "older", age_seconds=7200)
+        _, out = self.start("clear")
+        text = self.text(out)
+        self.assertNotIn("without asking for confirmation", text)
+        self.assertIn("/maestro-ai:resume older", text)
+
+    def test_startup_with_marker_only_offers(self):
+        path = self.context(os.path.join(self.home, "Documents", "maestro-ai", "subj"), "fresh-two")
+        marker = self.marker("fresh-two", path)
+        _, out = self.start("startup")
+        text = self.text(out)
+        self.assertNotIn("without asking for confirmation", text)
+        self.assertIn("/maestro-ai:resume fresh-two", text)
+        self.assertTrue(os.path.exists(marker))
+
+    def test_corrupt_marker_does_not_crash(self):
+        folder = os.path.join(self.home, ".maestro-ai")
+        os.makedirs(folder)
+        with open(os.path.join(folder, "pending-resume.json"), "w") as f:
+            f.write("{not json")
+        code, _ = self.start("clear")
+        self.assertEqual(code, 0)
+
+
 if __name__ == "__main__":
     unittest.main()

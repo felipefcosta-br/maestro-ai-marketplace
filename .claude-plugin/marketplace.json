@@ -9,7 +9,13 @@
       "name": "maestro-ai",
       "source": "./maestro-ai",
       "description": "A team of subagents for software development: research, implementation, testing, review and model escalation by complexity.",
-      "version": "0.4.11"
+      "version": "0.5.1"
+    },
+    {
+      "name": "maestro-ai-clear",
+      "source": "./maestro-ai-clear",
+      "description": "Optional companion mod for maestro-ai: saves the context, clears the conversation and resumes it by itself, with one click.",
+      "version": "0.1.0"
     }
   ]
 }

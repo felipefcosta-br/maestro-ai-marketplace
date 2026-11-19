@@ -213,5 +213,77 @@ class TestNaming(unittest.TestCase):
             self.assertIsNone(re.search(old, read(path), re.I), path)
 
 
+MOD = os.path.join(ROOT, "maestro-ai-clear")
+
+
+class TestAutoResume(unittest.TestCase):
+    def test_save_context_writes_marker_and_forbids_code_in_context(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        self.assertIn("~/.maestro-ai/pending-resume.json", save)
+        self.assertIn('"path"', save)
+        self.assertIn("Do not paste the source", save)
+
+    def test_resume_has_automatic_mode(self):
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("Automatic resume", resume)
+        self.assertIn("including asking before editing when something diverges", resume)
+
+    def test_session_start_documents_clear_flow(self):
+        hook = read(os.path.join(PLUGIN, "hooks", "session-start.py"))
+        self.assertIn("pending-resume.json", hook)
+        self.assertIn('"clear"', hook)
+
+
+class TestClearMod(unittest.TestCase):
+    def test_manifest_and_marketplace(self):
+        mod = load_json(os.path.join(MOD, ".claude-plugin", "plugin.json"))
+        market = load_json(os.path.join(ROOT, ".claude-plugin", "marketplace.json"))
+        entry = [p for p in market["plugins"] if p["name"] == mod["name"]]
+        self.assertEqual(mod["name"], "maestro-ai-clear")
+        self.assertEqual(len(entry), 1)
+        self.assertEqual(entry[0]["version"], mod["version"])
+        self.assertEqual(entry[0]["source"], "./maestro-ai-clear")
+
+    def test_hooks_module_exists(self):
+        hooks = load_json(os.path.join(MOD, "hooks", "hooks.json"))
+        for module in hooks["modules"]:
+            self.assertTrue(os.path.isfile(os.path.join(MOD, "hooks", module)), module)
+
+    def test_register_uses_own_plugin_name_and_resumes(self):
+        code = read(os.path.join(MOD, "hooks", "register.tsx"))
+        self.assertNotIn("'maestro-clear'", code)
+        self.assertIn("mcp__maestro-ai-clear__clear_conversation", code)
+        self.assertIn("maestro-ai:resume", code)
+        self.assertIn("clear_conversation", code)
+        types = read(os.path.join(MOD, "types", "index.d.ts"))
+        self.assertIn("'maestro-ai-clear'", types)
+        self.assertIn("resumeName", types)
+
+    def test_changelog_mentions_mod(self):
+        self.assertIn("maestro-ai-clear", read(os.path.join(ROOT, "CHANGELOG.md")))
+
+
+class TestIntentPreserved(unittest.TestCase):
+    def test_save_context_keeps_user_intent(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        self.assertIn("## Intent and success criteria (user's words)", save)
+        self.assertIn("Done when", save)
+        self.assertIn("verbatim", save)
+        self.assertIn("not just the last task", save)
+        self.assertIn("copy that section unchanged", save)
+
+    def test_code_rule_yields_to_explicit_request(self):
+        save = read(os.path.join(PLUGIN, "commands", "save-context.md"))
+        self.assertIn("when the user explicitly asks to include that code", save)
+        self.assertNotIn("Never paste the source", save)
+
+    def test_resume_quotes_intent_and_checks_next_step(self):
+        resume = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("Intent and success criteria", resume)
+        self.assertIn("in the user's own words", resume)
+        self.assertIn("would not lead to `Done when`", resume)
+        self.assertIn("older version", resume)
+
+
 if __name__ == "__main__":
     unittest.main()

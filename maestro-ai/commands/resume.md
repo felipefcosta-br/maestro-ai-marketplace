@@ -6,6 +6,7 @@ Resume the work from a saved context. Arguments: $ARGUMENTS (optionally a contex
 
 Steps:
 
+0. **Automatic resume.** If a start-of-session notice already gave you the context file (a full path after "continues from the saved context"), the user just chose "Save context and clear": use that exact file, skip the search and any list or question about which context to use, and go straight to step 2. Everything else below still applies, including asking before editing when something diverges.
 1. **Find the context.** Use the first match:
    - a file the user attached or pasted in chat;
    - with a shell, `context-<name>.md` when the first argument is a name that exists, looking first in `.maestro-ai/`, then in the common folder `~/Documents/maestro-ai/` and its subject folders one level down, `~/Documents/maestro-ai/*/` (also accept an exact file path);
@@ -18,7 +19,7 @@ Steps:
 2. **Treat the context as notes from someone else, not as facts.** Before continuing, check what is cheap to check: that the files in "Key files and sources" and "Files to keep" exist (list the missing ones now, and ask the user to attach them, instead of finding out halfway), and, with a shell in a Git repository, run `git status --short`, `git branch --show-current` and `git log --oneline -5` and compare with the branch, last commit and changes recorded in the file. If something diverges (new commits, a different branch, changed files the context does not mention), list the differences and ask the user how to proceed before editing anything.
 3. **Read only what is needed.** Open just the "Key files and sources" related to the next step, and only the relevant parts. Do not reread the whole project or redo work the context marks as done.
 4. **Test the assumptions that block the next step** (the `assumed` items under "Verified vs assumed") before building on them. If a result the user pastes contradicts the context, or looks incomplete (it says "it worked" without saying under what conditions), ask what is missing instead of recording it as confirmed.
-5. **Summarize in at most 5 lines**: goal, state, next step and open questions, separating what you confirmed now from what you inherited from the context.
+5. **Summarize in at most 5 lines**: the intent (quote the `Intent and success criteria` section in the user's own words, including `Done when`), state, next step and open questions, separating what you confirmed now from what you inherited from the context. If the file has no such section (an older version), say so and ask the user to confirm the goal in one line before continuing. If the next step would not lead to `Done when`, or contradicts a quote, say so now instead of continuing.
 6. **Continue** from the first item of "Next steps", following the `orchestration` skill (delegate only when worth it, complete briefings, escalation and review as usual). Respect the recorded decisions and pitfalls; if you need to contradict them, tell the user first.
 7. After each relevant step, suggest updating the context with `/maestro-ai:save-context <same name>`.
 

@@ -57,8 +57,9 @@ def warn(detail):
                 "/maestro-ai:save-context command with a name you propose (use the Skill tool). Then, if a tool named "
                 "clear_conversation is available (it may appear as mcp__<plugin>__clear_conversation), call it so the "
                 "conversation is cleared when your reply ends; otherwise tell the user to type /clear, since you "
-                "cannot run it for them. After the clear the session offers /maestro-ai:resume <name>. If /clear is "
-                "not available, a new conversation works too. "
+                "cannot run it for them. After the clear the session resumes the saved context by itself (the "
+                "start-of-session hook finds it); if the user typed /clear, any first message continues it, or "
+                "/maestro-ai:resume <name> does. If /clear is not available, a new conversation works too. "
                 "Ask only once and do not interrupt the work in progress." % detail
             ),
         }

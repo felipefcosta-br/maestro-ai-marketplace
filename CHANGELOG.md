@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.1] - 2026-11-19
+### Changed
+- Saved contexts keep the user's intent. New section `Intent and success criteria (user's words)`: short verbatim quotes of what the user asked for and why, plus a `Done when` line. `/maestro-ai:save-context` re-reads the user's requests across the whole conversation (not only the last task), copies the section unchanged when updating, and checks that Goal, Decisions and Next steps still lead to `Done when`.
+- `/maestro-ai:resume` quotes that intent in its opening summary, warns if the next step would not reach `Done when` or contradicts a quote, and asks the user to confirm the goal when an older context has no such section.
+- The rule against pasting code into a context now gives way to an explicit request from the user. Size guide raised to ~80 lines.
+
+## [0.5.0] - 2026-11-19
+### Changed
+- **Save and clear now continues by itself.** After `/clear`, the start-of-session hook resumes the context the user just saved, without asking, instead of only offering it. `/maestro-ai:resume` has an automatic mode (step 0) that uses the file the hook names and skips the search; its own checks still apply, and it asks before editing only when files or Git state diverge.
+- `/maestro-ai:save-context` writes a marker, `~/.maestro-ai/pending-resume.json` (name and full path), after saving. The hook uses it to find the context from any working folder. It is deleted when used and ignored after 15 minutes (`MAESTRO_AI_FRESH_MIN`).
+- Without a marker, after a clear the hook falls back to the newest context saved in the last 15 minutes, searched in the working folder, one folder down, `~/.maestro-ai/` and the common folder. This fixes the case where the context was saved in a repository folder and the new session opened in its parent, so nothing was found.
+- `/maestro-ai:save-context` never pastes the source of a tool, mod or script into a context; it lists the file path instead, so the context stays short and cheap to resume.
+### Added
+- `maestro-ai-clear` 0.1.0 (optional companion mod, in this repository): button "Save context and clear" and the `clear_conversation` tool, now with automatic `/maestro-ai:resume <name>` after the clear. It confirms the save by looking at every assistant message of the turn, not only the last one.
+
 ## [0.4.11] - 2026-11-15
 ### Changed
 - After saving the context, the long-conversation warning tells Claude to call a `clear_conversation` tool when one is available (provided by an optional companion mod), so the conversation is cleared with no extra step; without it, the user types `/clear` as before.
