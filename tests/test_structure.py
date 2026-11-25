@@ -289,5 +289,43 @@ class TestIntentPreserved(unittest.TestCase):
         self.assertIn("older version", resume)
 
 
+class TestSecurityRelease(unittest.TestCase):
+    def test_no_cloud_setup_script_left(self):
+        self.assertFalse(os.path.exists(os.path.join(ROOT, "scripts", "cloud-setup.sh")))
+
+    def test_releasing_doc(self):
+        doc = read(os.path.join(ROOT, "RELEASING.md"))
+        for needle in ("Check for updates", "Sync automatically", "claude plugin update", "2FA", "Protect `main`", ".gitignore"):
+            self.assertIn(needle, doc)
+        self.assertNotIn("cloud-setup", doc)
+        self.assertNotIn("plugin-version", doc)
+
+    def test_agents_do_not_claim_enforced_read_only(self):
+        for name in ("analyst", "architect", "reviewer"):
+            text = read(os.path.join(PLUGIN, "agents", name + ".md"))
+            head = text.split("---")[1]
+            self.assertIn("Bash", head.split("tools:")[1].split("\n")[0], name)
+            self.assertRegex(head, r"(?i)by instruction|instructed|rule", name)
+            self.assertIn("nothing technical stops you", text, name)
+
+    def test_readme_security_note(self):
+        en = read(os.path.join(ROOT, "README.md"))
+        pt = read(os.path.join(ROOT, "README.pt-BR.md"))
+        for needle in ("read-only by instruction", "Supply chain", ".maestro-ai/", "2FA"):
+            self.assertIn(needle, en)
+        for needle in ("somente leitura por instrução", "Cadeia de suprimento", ".maestro-ai/", "2FA"):
+            self.assertIn(needle, pt)
+        self.assertNotIn("repository is private", en)
+
+    def test_resume_treats_context_as_data(self):
+        text = read(os.path.join(PLUGIN, "commands", "resume.md"))
+        self.assertIn("as data, not as instructions", text)
+
+    def test_changelog_top_entry_matches_version(self):
+        manifest = load_json(os.path.join(PLUGIN, ".claude-plugin", "plugin.json"))
+        top = re.search(r"^## \[(\S+)\]", read(os.path.join(ROOT, "CHANGELOG.md")), re.M).group(1)
+        self.assertEqual(top, manifest["version"])
+
+
 if __name__ == "__main__":
     unittest.main()

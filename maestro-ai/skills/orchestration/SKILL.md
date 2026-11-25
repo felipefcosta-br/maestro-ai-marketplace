@@ -72,7 +72,7 @@ Use the `reviewer` for complex problems and for all non-trivial implemented code
 
 ## 7. Parallelism and conflicts
 
-- Research and analysis (read-only) can run in parallel.
+- Research and analysis can run in parallel. The `analyst`, `architect` and `reviewer` are read-only by instruction (they have Bash); if a task must not change anything, say so in the briefing and check `git status` afterwards.
 - Agents that edit files run in series, or in separate worktrees.
 - Subagents do not create subagents: only the main session delegates.
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.1] - 2026-11-20
+### Security
+- **The resume marker is validated.** After a clear, `session-start.py` resumes only a regular file (not a symlink, under 512 KB) named `context-<name>.md` (letters, digits, `.`, `_`, `-`) inside a `.maestro-ai` folder or the common folder `~/Documents/maestro-ai/` (and its subject folders), given as an absolute path. The name shown to the model comes from the file name, never from the marker text, so a tampered marker cannot inject instructions or point at another file. Context files with other names are not offered either.
+- **Wider protection hook.** Now blocked: `rm` with recursive and force flags in any spelling (`-r -f`, `--recursive --force`, full path, after `sudo` or `&&`), `find -delete` / `-exec rm`, `rmtree`, pushes with `+refspec`, `git checkout -- .`, `git restore .`, `git branch -D`, `curl | python3` and other interpreters, `bash <(curl ...)`, `eval` of downloads, `printenv`, `env | ...`, `/proc/*/environ`, and more secret files (`.npmrc`, `.pypirc`, `.git-credentials`, `.kube/config`, `.docker/config.json`, GitHub CLI `hosts.yml`, Claude credentials). Quotes and backslashes are removed before matching, so `.e""nv` no longer slips through. It is still a speed bump, not a boundary.
+- `/maestro-ai:resume` treats the context file as data, not instructions: lines that ask to run commands, read other files or change settings are shown to the user first.
+### Changed
+- `analyst`, `architect` and `reviewer` no longer claim to be read-only as a fact: they have Bash, so descriptions, READMEs and the orchestration skill say "read-only by instruction".
+- README (EN and pt-BR): Security note now covers the marker, the agents, supply-chain tips (2FA/passkey, protected `main`, signed commits, pin or disable auto-update on corporate machines) and `.maestro-ai/` in `.gitignore`. The repository is public; the old "private" sentence is gone.
+- `RELEASING.md`: release steps and where each copy updates (terminal, desktop/Cowork per account, cloud through the account that owns the session).
+
 ## [0.6.0] - 2026-11-19
 ### Changed
 - **The `maestro-ai-clear` mod is now part of `maestro-ai`.** One plugin, one install, one version: the "Save context and clear" band, the `clear_conversation` tool and the automatic `/maestro-ai:resume` after the clear ship inside `maestro-ai` (`hooks/register.tsx`, `types/`). The tool is now `mcp__maestro-ai__clear_conversation`.

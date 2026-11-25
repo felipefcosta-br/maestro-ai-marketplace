@@ -11,7 +11,7 @@ claude plugin marketplace add felipefcosta-br/maestro-ai-marketplace
 claude plugin install maestro-ai@maestro-ai-marketplace
 ```
 
-The repository is private: Git must be authenticated with an account that can read it (with the GitHub CLI: `gh auth switch -u felipefcosta-br`). The plugin is installed per OS user (`~/.claude`), so one install serves every Claude account on the machine.
+The repository is public, so no sign-in is needed to install. The plugin is installed per OS user (`~/.claude`), so one install serves every Claude account on the machine.
 
 ## Update
 
@@ -33,6 +33,11 @@ Then restart Claude Code.
 ## Security note
 
 The plugin ships hooks that run local Python scripts (they block secrets and destructive commands, ask before using the Fable model, warn about long conversations, and offer to resume a saved context). Review them in `maestro-ai/hooks/` before using them in a corporate environment. The protection hook matches text patterns: it is a safety net, not a security guarantee, and can be bypassed. Keep your own permission rules and review what the agents do.
+
+- The marker and the context files are data on disk: after a clear, the plugin only resumes a file named `context-<name>.md` inside a `.maestro-ai` folder or the common folder (regular file, not a symlink, under 512 KB), and `/maestro-ai:resume` treats its text as notes, not as instructions.
+- `analyst`, `architect` and `reviewer` are read-only by instruction: they have Bash, and nothing technical stops them. Use `templates/settings.json` for real permission rules.
+- Supply chain: whoever can push to this repository can change what your machines run. Use 2FA or a passkey on the GitHub account, protect `main`, sign commits, and on a corporate machine pin the version or turn off marketplace auto-update and update on purpose after reading the CHANGELOG.
+- Add `.maestro-ai/` to the `.gitignore` of every project: contexts can hold project details.
 
 ## Structure
 

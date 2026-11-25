@@ -27,12 +27,12 @@ In chat, the skill's rules still guide the conversation (briefing, asking before
 | Agent | Model | Tools | Role |
 |---|---|---|---|
 | researcher | haiku | read, web | Find information, read docs |
-| analyst | sonnet | read, bash | Investigate code and logs (read-only) |
+| analyst | sonnet | read, bash | Investigate code and logs (read-only by instruction) |
 | implementer | sonnet | read, edit, bash | Implement well-defined changes |
 | tester | sonnet | read, edit, bash | Write and run tests |
 | specialist | opus | read, edit, bash | Complex or delicate tasks |
 | architect | opus (fable on request) | read, bash | Design and trade-offs; the user is always asked Fable vs Opus, with a recommendation |
-| reviewer | sonnet | read, bash | Review complex or implemented code (read-only) |
+| reviewer | sonnet | read, bash | Review complex or implemented code (read-only by instruction) |
 
 Agents write reports in the language of the briefing, in `summary` or `didactic` mode.
 

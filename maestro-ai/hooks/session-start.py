@@ -21,6 +21,7 @@ is resumed or compacted.
 import glob
 import json
 import os
+import re
 import sys
 import time
 
@@ -54,8 +55,37 @@ base = os.path.join(home, "Documents", "maestro-ai")
 marker_path = os.path.join(home, ".maestro-ai", "pending-resume.json")
 
 
+FILE_RE = re.compile(r"^context-([A-Za-z0-9._-]{1,80})\.md$")
+MAX_BYTES = 512 * 1024
+
+
 def name_of(path):
-    return os.path.basename(path)[len("context-"):-len(".md")]
+    m = FILE_RE.match(os.path.basename(path))
+    return m.group(1) if m else ""
+
+
+def trusted(path):
+    """True only for a real context file in a place maestro-ai itself writes to.
+
+    The marker and the file names are data on disk, so they are checked before
+    anything from them reaches the model: strict file name, regular file (no
+    symlink), reasonable size, and a `.maestro-ai` folder or the common folder.
+    """
+    try:
+        if not path or not os.path.isabs(path) or os.path.islink(path):
+            return False
+        if not name_of(path) or not os.path.isfile(path):
+            return False
+        if os.path.getsize(path) > MAX_BYTES:
+            return False
+        real = os.path.realpath(path)
+        folder = os.path.dirname(real)
+        if os.path.basename(folder) == ".maestro-ai":
+            return True
+        real_base = os.path.realpath(base)
+        return folder == real_base or os.path.dirname(folder) == real_base
+    except OSError:
+        return False
 
 
 def context_files():
@@ -69,7 +99,7 @@ def context_files():
     found = []
     for pattern in patterns:
         found.extend(glob.glob(pattern))
-    return [f for f in dict.fromkeys(found) if os.path.isfile(f)]
+    return [f for f in dict.fromkeys(found) if trusted(f)]
 
 
 def read_marker():
@@ -92,9 +122,9 @@ def read_marker():
     if not isinstance(marker, dict):
         return None
     path = os.path.expanduser(str(marker.get("path") or ""))
-    name = str(marker.get("name") or "")
-    if path and os.path.isfile(path):
-        return (name or name_of(path), path)
+    if trusted(path):
+        # the name always comes from the (validated) file name, never from the marker text
+        return (name_of(path), path)
     return None
 
 
@@ -124,7 +154,7 @@ if source == "clear":
         name, path = target
         emit(
             "maestro-ai notice: this session was just cleared on purpose after the user chose 'Save context and "
-            "clear', so the work continues from the saved context `%s` (file: %s). Continue it now, in your next "
+            "clear', so the work continues from the saved context `%s` (file: `%s`). Continue it now, in your next "
             "reply, without asking for confirmation and without asking what is being worked on: follow "
             "/maestro-ai:resume for that file (use that exact path, do not search or list other contexts). Skip this "
             "if the user's message already is /maestro-ai:resume. Resume's own checks still apply: only ask before "
