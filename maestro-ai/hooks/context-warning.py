@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""UserPromptSubmit: warns when the conversation has become long.
+"""UserPromptSubmit: warns when the conversation has become long, and keeps reminding.
 
-Plan A: if the hook receives `transcript_path`, it measures the transcript size and
-warns when it passes MAESTRO_AI_LIMIT_KB (default 600), and again each time it grows
-by another MAESTRO_AI_LIMIT_KB since the last warning (so declining once does not
-silence the session for good).
+The hook counts the user's prompts in each session and, when it can read the transcript
+(`transcript_path`), also measures its size. It warns when either limit is reached:
+  - the transcript is at least MAESTRO_AI_LIMIT_KB (default 1500), or
+  - the session has MAESTRO_AI_LIMIT_MSGS prompts (default 40).
 
-Plan B: if there is no readable transcript, it counts messages and warns every
-MAESTRO_AI_LIMIT_MSGS messages (default 30). The counter key is the `session_id`;
-without it, the working directory is used (the counter is then shared between
-sessions of the same project, which is imprecise but stable).
+After a warning it reminds again, even if the user answered "Not now", when either:
+  - MAESTRO_AI_REMIND_MSGS more prompts have passed (default 30), or
+  - the transcript has grown by another MAESTRO_AI_LIMIT_KB since the last warning.
+
+The state key is the `session_id`; without it, the working directory is used (the state is
+then shared between sessions of the same project, which is imprecise but stable).
 """
 import hashlib
 import json
@@ -26,8 +28,9 @@ def integer(name, default):
         return default
 
 
-LIMIT_KB = integer("MAESTRO_AI_LIMIT_KB", 600)
-LIMIT_MSGS = integer("MAESTRO_AI_LIMIT_MSGS", 30)
+LIMIT_KB = integer("MAESTRO_AI_LIMIT_KB", 1500)
+LIMIT_MSGS = integer("MAESTRO_AI_LIMIT_MSGS", 40)
+REMIND_MSGS = integer("MAESTRO_AI_REMIND_MSGS", 30)
 
 try:
     data = json.load(sys.stdin)
@@ -60,48 +63,62 @@ def warn(detail):
                 "cannot run it for them. After the clear the session resumes the saved context by itself (the "
                 "start-of-session hook finds it); if the user typed /clear, any first message continues it, or "
                 "/maestro-ai:resume <name> does. If /clear is not available, a new conversation works too. "
-                "Ask only once and do not interrupt the work in progress." % detail
+                "This notice is new: ask once for it, even if you asked before in this session and the user said "
+                "'Not now'. Do not interrupt the work in progress." % detail
             ),
         }
     }))
 
 
-transcript = data.get("transcript_path")
-
-if isinstance(transcript, str) and os.path.isfile(transcript):
-    # Plan A: transcript size, one warning per LIMIT_KB of growth
-    size_kb = os.path.getsize(transcript) / 1024
-    marker = os.path.join(tmp, "maestro-ai-warned-" + key)
-    last = 0
-    if os.path.exists(marker):
-        try:
-            with open(marker) as f:
-                last = int(float(f.read().strip() or LIMIT_KB))
-        except (OSError, ValueError):
-            last = LIMIT_KB
-    threshold = LIMIT_KB if last == 0 else last + LIMIT_KB
-    if size_kb >= threshold:
-        try:
-            with open(marker, "w") as f:
-                f.write(str(int(size_kb)))
-        except OSError:
-            pass
-        warn("transcript of ~%d KB" % int(size_kb))
-else:
-    # Plan B: message counter, warn every LIMIT_MSGS messages
-    counter_file = os.path.join(tmp, "maestro-ai-counter-" + key)
+def read_state(path):
     try:
-        with open(counter_file) as f:
-            n = int(f.read().strip() or "0")
-    except (OSError, ValueError):
-        n = 0
-    n += 1
-    try:
-        with open(counter_file, "w") as f:
-            f.write(str(n))
-    except OSError:
+        with open(path) as f:
+            state = json.load(f)
+        if isinstance(state, dict):
+            return {
+                "n": int(state.get("n", 0)),
+                "warned_n": int(state.get("warned_n", 0)),
+                "warned_kb": float(state.get("warned_kb", 0)),
+            }
+    except (OSError, ValueError, TypeError):
         pass
-    if n % LIMIT_MSGS == 0:
-        warn("about %d messages" % n)
+    return {"n": 0, "warned_n": 0, "warned_kb": 0.0}
+
+
+state_file = os.path.join(tmp, "maestro-ai-state-" + key)
+state = read_state(state_file)
+state["n"] += 1
+
+size_kb = None
+transcript = data.get("transcript_path")
+if isinstance(transcript, str) and os.path.isfile(transcript):
+    try:
+        size_kb = os.path.getsize(transcript) / 1024
+    except OSError:
+        size_kb = None
+
+if state["warned_n"] == 0:
+    due = state["n"] >= LIMIT_MSGS or (size_kb is not None and size_kb >= LIMIT_KB)
+else:
+    due = (
+        state["n"] - state["warned_n"] >= REMIND_MSGS
+        or (size_kb is not None and size_kb - state["warned_kb"] >= LIMIT_KB)
+    )
+
+if due:
+    state["warned_n"] = state["n"]
+    state["warned_kb"] = size_kb if size_kb is not None else 0.0
+
+try:
+    with open(state_file, "w") as f:
+        json.dump(state, f)
+except OSError:
+    pass
+
+if due:
+    detail = "%d message%s" % (state["n"], "" if state["n"] == 1 else "s")
+    if size_kb is not None:
+        detail += ", transcript of ~%d KB" % int(size_kb)
+    warn(detail)
 
 sys.exit(0)

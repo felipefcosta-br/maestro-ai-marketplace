@@ -166,7 +166,7 @@ class TestContextWarning(unittest.TestCase):
         self.assertIn("clear_conversation", text)
         return True
 
-    def test_plan_a_warns_once(self):
+    def test_plan_a_warns_once_then_waits(self):
         transcript = os.path.join(self.tmp, "t.jsonl")
         with open(transcript, "w") as f:
             f.write("x" * 3 * 1024)
@@ -197,14 +197,42 @@ class TestContextWarning(unittest.TestCase):
         _, out = run("context-warning.py", {"session_id": "s2", "transcript_path": transcript}, env)
         self.assertFalse(self.warned(out))
 
+    def test_reminds_after_not_now_even_without_growth(self):
+        transcript = os.path.join(self.tmp, "t.jsonl")
+        with open(transcript, "w") as f:
+            f.write("x" * 3 * 1024)
+        env = dict(self.env, MAESTRO_AI_LIMIT_KB="100", MAESTRO_AI_LIMIT_MSGS="2", MAESTRO_AI_REMIND_MSGS="3")
+        payload = {"session_id": "s4", "transcript_path": transcript}
+        results = [self.warned(run("context-warning.py", payload, env)[1]) for _ in range(8)]
+        self.assertEqual(results, [False, True, False, False, True, False, False, True])
+
+    def test_small_transcript_still_warns_by_message_count(self):
+        transcript = os.path.join(self.tmp, "t.jsonl")
+        with open(transcript, "w") as f:
+            f.write("x")
+        env = dict(self.env, MAESTRO_AI_LIMIT_KB="600", MAESTRO_AI_LIMIT_MSGS="3")
+        payload = {"session_id": "s5", "transcript_path": transcript}
+        results = [self.warned(run("context-warning.py", payload, env)[1]) for _ in range(4)]
+        self.assertEqual(results, [False, False, True, False])
+
+    def test_defaults_are_not_too_eager(self):
+        payload = {"session_id": "s6"}
+        results = [self.warned(run("context-warning.py", payload, self.env)[1]) for _ in range(39)]
+        self.assertFalse(any(results))
+
+    def test_notice_tells_the_model_it_is_a_new_ask(self):
+        env = dict(self.env, MAESTRO_AI_LIMIT_MSGS="1")
+        _, out = run("context-warning.py", {"session_id": "s7"}, env)
+        self.assertIn("even if you asked before", out["hookSpecificOutput"]["additionalContext"])
+
     def test_plan_b_counter(self):
-        env = dict(self.env, MAESTRO_AI_LIMIT_MSGS="3")
+        env = dict(self.env, MAESTRO_AI_LIMIT_MSGS="3", MAESTRO_AI_REMIND_MSGS="3")
         payload = {"session_id": "s3"}
         results = [self.warned(run("context-warning.py", payload, env)[1]) for _ in range(6)]
         self.assertEqual(results, [False, False, True, False, False, True])
 
     def test_plan_b_without_session_id(self):
-        env = dict(self.env, MAESTRO_AI_LIMIT_MSGS="2")
+        env = dict(self.env, MAESTRO_AI_LIMIT_MSGS="2", MAESTRO_AI_REMIND_MSGS="2")
         payload = {"cwd": "/some/project"}
         results = [self.warned(run("context-warning.py", payload, env)[1]) for _ in range(4)]
         self.assertEqual(results, [False, True, False, True])

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.2] - 2026-11-26
+### Fixed
+- **The long-conversation warning now repeats and is less eager.** The hook counts prompts in every session, even when it can read the transcript, so it no longer depends on which of the two measures the host provides. First warning at 40 prompts (`MAESTRO_AI_LIMIT_MSGS`) or 1500 KB of transcript (`MAESTRO_AI_LIMIT_KB`, was 600), whichever comes first. After a warning, including after "Not now", it reminds again every 30 prompts (`MAESTRO_AI_REMIND_MSGS`) or when the transcript grows by another `MAESTRO_AI_LIMIT_KB`.
+- The notice now says it is new and must be asked once even if the model already asked earlier in the session; the old "Ask only once" could be read as once per session. The orchestration skill no longer says the hook warns once.
+- Tests cover the reminder after "Not now", the warning by prompt count with a small transcript, and the conservative defaults.
+
 ## [0.6.1] - 2026-11-20
 ### Security
 - **The resume marker is validated.** After a clear, `session-start.py` resumes only a regular file (not a symlink, under 512 KB) named `context-<name>.md` (letters, digits, `.`, `_`, `-`) inside a `.maestro-ai` folder or the common folder `~/Documents/maestro-ai/` (and its subject folders), given as an absolute path. The name shown to the model comes from the file name, never from the marker text, so a tampered marker cannot inject instructions or point at another file. Context files with other names are not offered either.

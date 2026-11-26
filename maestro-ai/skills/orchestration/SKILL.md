@@ -91,7 +91,7 @@ For repeatable sequences use the plugin commands:
 
 ## 10. Long conversations and continuity
 
-Every reply resends the history, so long conversations get expensive and lose focus. When the conversation is long (the hook warns once), or when a big step is done:
+Every reply resends the history, so long conversations get expensive and lose focus. When the conversation is long (the hook warns, then reminds every so often), or when a big step is done:
 - Suggest `/maestro-ai:save-context <name>` to the user (one name per conversation or topic, so contexts never mix). It writes the state to a named file, `.maestro-ai/context-<name>.md` (goal, decisions, next steps, key files, pitfalls).
 - Then continue in a clean session with `/maestro-ai:resume <name>`, which reads only that file, checks the repository state and picks up from the next step.
 - The context file never contains secrets; `.maestro-ai/` should stay out of Git unless the user decides otherwise.
