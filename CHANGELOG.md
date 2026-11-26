@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.3] - 2026-11-26
+### Added
+- **Choose when the main session uses the maestro-ai agents.** New plugin option `maestro_mode`, asked when the plugin is enabled and editable in `/config`: `complex` (default: delegate only complex tasks), `always`, `ask` (in a new conversation, ask once with the buttons "Use maestro-ai" / "Work directly") and `manual` (only when the user asks). A new `SessionStart` hook, `maestro-ai-mode.py`, gives the main session one short line with the mode (about 40 tokens); `ask` adds the question only in a brand-new conversation, never after `/clear`, compact or resume.
+- **`/maestro-ai:mode [complex|always|ask|manual|reset]`** shows or changes the mode. With no argument it shows the current one and asks with buttons. The choice is stored as an override in `~/.maestro-ai/preferences.json` (a small regular file, never a symlink; invalid content is ignored); `reset` removes it and the plugin option applies again.
+- The orchestration skill follows the mode notice.
+### Compatibility
+- `options` on a `userConfig` field needs Claude Code 2.1.271 or later; older versions cannot load the plugin.
+
 ## [0.6.2] - 2026-11-26
 ### Fixed
 - **The long-conversation warning now repeats and is less eager.** The hook counts prompts in every session, even when it can read the transcript, so it no longer depends on which of the two measures the host provides. First warning at 40 prompts (`MAESTRO_AI_LIMIT_MSGS`) or 1500 KB of transcript (`MAESTRO_AI_LIMIT_KB`, was 600), whichever comes first. After a warning, including after "Not now", it reminds again every 30 prompts (`MAESTRO_AI_REMIND_MSGS`) or when the transcript grows by another `MAESTRO_AI_LIMIT_KB`.

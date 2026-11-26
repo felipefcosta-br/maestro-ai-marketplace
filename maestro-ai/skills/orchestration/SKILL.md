@@ -21,6 +21,8 @@ Use the chosen language for every reply to the user, every briefing and the save
 
 ## 1. Delegate or do it directly
 
+Follow the "maestro-ai mode" notice given at the start of the session when there is one (complex, always, ask or manual); `/maestro-ai:mode` changes it.
+
 **Do it directly:** simple questions, small tasks (1-2 files), anything where the context is already in the conversation.
 
 **Delegate when:**

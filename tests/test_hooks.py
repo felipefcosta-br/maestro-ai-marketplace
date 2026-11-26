@@ -243,6 +243,122 @@ class TestContextWarning(unittest.TestCase):
             self.assertEqual(code, 0)
 
 
+class TestMaestroMode(unittest.TestCase):
+    ENV_NAME = "CLAUDE_PLUGIN_OPTION_MAESTRO_MODE"
+
+    def setUp(self):
+        self.home = tempfile.mkdtemp()
+        self.base = {"HOME": self.home, "USERPROFILE": self.home}
+
+    def hook(self, source="startup", **extra):
+        env = dict(self.base)
+        env.update(extra)
+        payload = {"source": source} if source else {}
+        _, out = run("maestro-ai-mode.py", payload, env)
+        return out["hookSpecificOutput"]["additionalContext"] if out else None
+
+    def cli(self, *args, **extra):
+        env = dict(os.environ)
+        env.pop(self.ENV_NAME, None)
+        env.update(self.base)
+        env.update(extra)
+        p = subprocess.run(
+            [sys.executable, os.path.join(HOOKS, "maestro-ai-mode.py")] + list(args),
+            capture_output=True, text=True, env=env, timeout=20,
+        )
+        return p.returncode, p.stdout.strip()
+
+    def prefs(self):
+        return os.path.join(self.home, ".maestro-ai", "preferences.json")
+
+    def test_default_is_complex(self):
+        text = self.hook(**{self.ENV_NAME: ""})
+        self.assertIn("mode: complex", text)
+        self.assertIn("complex tasks", text)
+
+    def test_option_from_config(self):
+        for mode in ("complex", "always", "ask", "manual"):
+            text = self.hook(**{self.ENV_NAME: mode})
+            self.assertIn("mode: " + mode, text)
+
+    def test_invalid_config_falls_back_to_default(self):
+        self.assertIn("mode: complex", self.hook(**{self.ENV_NAME: "bogus"}))
+
+    def test_ask_asks_with_buttons_only_on_a_new_conversation(self):
+        env = {self.ENV_NAME: "ask"}
+        text = self.hook("startup", **env)
+        self.assertIn("AskUserQuestion", text)
+        self.assertIn("Use maestro-ai", text)
+        self.assertIn("Work directly", text)
+        for source in ("clear", "compact", "resume"):
+            self.assertIsNone(self.hook(source, **env), source)
+
+    def test_other_modes_apply_after_clear_too(self):
+        self.assertIn("mode: always", self.hook("clear", **{self.ENV_NAME: "always"}))
+        self.assertIn("mode: manual", self.hook("clear", **{self.ENV_NAME: "manual"}))
+
+    def test_manual_does_not_delegate(self):
+        self.assertIn("Do not use", self.hook(**{self.ENV_NAME: "manual"}))
+
+    def test_set_overrides_config_and_reset_restores_it(self):
+        code, out = self.cli("--set", "manual")
+        self.assertEqual(code, 0, out)
+        self.assertTrue(os.path.isfile(self.prefs()))
+        self.assertIn("mode: manual", self.hook(**{self.ENV_NAME: "always"}))
+        code, _ = self.cli("--reset")
+        self.assertEqual(code, 0)
+        self.assertFalse(os.path.exists(self.prefs()))
+        self.assertIn("mode: always", self.hook(**{self.ENV_NAME: "always"}))
+
+    def test_set_rejects_invalid_mode(self):
+        for args in (("--set", "bogus"), ("--set",), ("--set", "../etc")):
+            code, _ = self.cli(*args)
+            self.assertEqual(code, 2, args)
+        self.assertFalse(os.path.exists(self.prefs()))
+
+    def test_unknown_option_prints_usage(self):
+        code, out = self.cli("--nope")
+        self.assertEqual(code, 2)
+        self.assertIn("usage", out)
+
+    def test_show_reports_override_and_last_mode(self):
+        self.hook(**{self.ENV_NAME: "always"})
+        self.cli("--set", "ask")
+        code, out = self.cli("--show")
+        self.assertEqual(code, 0)
+        self.assertIn("override: ask", out)
+        self.assertIn("mode at last session start: always (config)", out)
+
+    def test_show_without_state(self):
+        code, out = self.cli("--show")
+        self.assertEqual(code, 0)
+        self.assertIn("override: none", out)
+
+    def test_override_file_must_be_a_small_regular_file(self):
+        os.makedirs(os.path.dirname(self.prefs()))
+        target = os.path.join(self.home, "elsewhere.json")
+        with open(target, "w") as f:
+            json.dump({"mode": "manual"}, f)
+        os.symlink(target, self.prefs())
+        self.assertIn("mode: complex", self.hook(**{self.ENV_NAME: ""}))
+        os.remove(self.prefs())
+        with open(self.prefs(), "w") as f:
+            f.write(json.dumps({"mode": "manual", "pad": "x" * 5000}))
+        self.assertIn("mode: complex", self.hook(**{self.ENV_NAME: ""}))
+
+    def test_invalid_override_is_ignored(self):
+        os.makedirs(os.path.dirname(self.prefs()))
+        for content in ("not json", "[]", json.dumps({"mode": "bogus"})):
+            with open(self.prefs(), "w") as f:
+                f.write(content)
+            self.assertIn("mode: always", self.hook(**{self.ENV_NAME: "always"}), content)
+
+    def test_invalid_input(self):
+        for raw in ("", "nope", "[]"):
+            code, _ = run("maestro-ai-mode.py", None, dict(self.base, **{self.ENV_NAME: ""}), raw=raw)
+            self.assertEqual(code, 0)
+
+
 class TestSessionStart(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()

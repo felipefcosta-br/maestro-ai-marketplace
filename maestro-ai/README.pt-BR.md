@@ -8,7 +8,7 @@ Um time de subagentes para desenvolvimento de software. A sessão principal orqu
 
 - **agents/**: sete subagentes (tabela abaixo)
 - **skills/orchestration/**: regras de quando delegar, briefing, escalonamento e revisão (carregada sob demanda)
-- **commands/**: `/maestro-ai:research`, `/maestro-ai:plan`, `/maestro-ai:save-context`, `/maestro-ai:resume` (em todo lugar); `/maestro-ai:implement-test-review`, `/maestro-ai:pre-commit-review` (código)
+- **commands/**: `/maestro-ai:research`, `/maestro-ai:plan`, `/maestro-ai:save-context`, `/maestro-ai:resume`, `/maestro-ai:mode` (em todo lugar); `/maestro-ai:implement-test-review`, `/maestro-ai:pre-commit-review` (código)
 - **hooks/**: proteção contra segredos e comandos destrutivos, confirmação do Fable, aviso de conversa longa
 - **templates/**: `AGENTS.md`, `settings.json`, formatos de briefing e saída
 
@@ -56,6 +56,17 @@ Copie `templates/AGENTS.md` para cada repositório e preencha a seção "Project
 ## Idioma
 
 Se o usuário escreve em inglês, tudo é em inglês. Se escreve em outro idioma e nenhum está registrado, a sessão principal pergunta uma vez qual idioma usar e registra (`Language:` no `AGENTS.md` / no arquivo de contexto salvo).
+
+## Quando o maestro-ai é usado
+
+A opção `maestro_mode` do plugin (perguntada ao ativar o plugin, editável em `/config`) decide quando a sessão principal usa os agentes:
+
+- `complex` (padrão): só em tarefas complexas (mudança em mais de dois arquivos, pesquisa com fontes, revisão de código não trivial). Perguntas simples e edições pequenas são feitas direto.
+- `always`: em toda tarefa de desenvolvimento.
+- `ask`: em uma conversa nova, quando a primeira tarefa estiver clara e não for trivial, uma pergunta com botões (Use maestro-ai / Work directly). Não pergunta de novo depois de `/clear`, compactação ou retomada.
+- `manual`: só quando você pedir (um comando `/maestro-ai:` ou palavras como "use o maestro-ai").
+
+`/maestro-ai:mode` mostra o modo atual e o muda com botões, ou direto: `/maestro-ai:mode always`. Fica guardado como substituição em `~/.maestro-ai/preferences.json`; `/maestro-ai:mode reset` remove e a opção volta a valer. O modo custa uma linha curta por sessão (nada extra depois do início). A opção exige o Claude Code 2.1.271 ou mais novo.
 
 ## Conversas longas
 

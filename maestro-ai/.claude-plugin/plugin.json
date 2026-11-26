@@ -1,6 +1,6 @@
 {
   "name": "maestro-ai",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "license": "MIT",
   "description": "A team of subagents for software development: research, implementation, testing, review and model escalation by complexity.",
   "author": {
@@ -14,6 +14,18 @@
       "title": "Save context and clear",
       "description": "Show the Save context and clear button and the clear_conversation tool (Claude Code only). Turn off to keep only the plugin's hooks, agents and commands.",
       "default": true
+    },
+    "maestro_mode": {
+      "type": "string",
+      "title": "When to use the maestro-ai agents",
+      "description": "complex: only for complex tasks (default). always: for every development task. ask: ask once in each new conversation. manual: only when you ask. Change it later in /config or with /maestro-ai:mode.",
+      "options": [
+        "complex",
+        "always",
+        "ask",
+        "manual"
+      ],
+      "default": "complex"
     }
   }
 }

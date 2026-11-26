@@ -90,14 +90,14 @@ class TestSkillCommandsHooks(unittest.TestCase):
 
     def test_commands_have_description(self):
         commands = glob.glob(os.path.join(PLUGIN, "commands", "*.md"))
-        self.assertEqual(len(commands), 6)
+        self.assertEqual(len(commands), 7)
         for c in commands:
             self.assertTrue(frontmatter(c).get("description"), c)
 
     def test_hook_scripts_exist(self):
         hooks = load_json(os.path.join(PLUGIN, "hooks", "hooks.json"))
         scripts = re.findall(r"hooks/([\w.-]+\.py)", json.dumps(hooks))
-        self.assertEqual(len(scripts), 4)
+        self.assertEqual(len(scripts), 5)
         for s in scripts:
             self.assertTrue(os.path.isfile(os.path.join(PLUGIN, "hooks", s)), s)
 
